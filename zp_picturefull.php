@@ -38,7 +38,7 @@
  * @author Malte Müller (acrylian)
  *
  * @package plugins
- * @subpackage image
+ * @subpackage media
  */
  
 $plugin_is_filter = 9|THEME_PLUGIN;
