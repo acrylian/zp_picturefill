@@ -5,7 +5,8 @@ A plugin to responsively provide different image resolutions for different scree
 and HiDPI ("Retina") counter parts
  
 An adaption of Picturefill by Scott Jehl - https://github.com/scottjehl/picturefill
-**Note: This is version 1 from picturefill - Update to 2 is planned for later**
+
+**Note: This is version 1 - Update to 2 is planned for later**
  
 Responsive breakpoints
 -----------------------
