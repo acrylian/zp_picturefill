@@ -299,7 +299,7 @@ function picturefilljs() {
 			$imgobj = $_zp_current_image;
 		}
 		getMaxSpaceContainer($width, $height, $imgobj);
-		$img_sd = $imgobj->getCustomImage(NULL, $w, $h, NULL, NULL, NULL, NULL, $thumb, $effects);
+		$img_sd = $imgobj->getCustomImage(NULL, $width, $height, NULL, NULL, NULL, NULL, $thumb, $effects);
 		$img_hd = NULL;
 		if($hd) {
 			$w2 = $width * 2;
