@@ -2,7 +2,8 @@
 /**
  * A plugin to responsively provide different image resolutions for different screen sizes as well as standard 
  * and HiDPI ("Retina") counter parts
- * An adaption of Picturefill by Scott Jehl - https://github.com/scottjehl/picturefill
+ * An adaption of Picturefill 2.x by Scott Jehl - https://github.com/scottjehl/picturefill
+ * Read more about it on http://scottjehl.github.io/picturefill/
  *
  * Responsive breakpoints:
  * These three are setup by default:
@@ -24,10 +25,11 @@
  * There is no HTML standard for this yet so this needs to be done via JavaScript for now.  
  * (Although Webkit recenlty has introduced the srcset atribute that probably becomes standard later on).
  *
+ * Default image compression note
  * The plugin also follows observations made for example on http://filamentgroup.com/lab/rwd_img_compression/ 
  * that a high density image can be compressed much more without loosing actual display quality. 
- * That way their file size is not that much bigger than standard images. The hires images are always compressed at 35% always 
- * while the standard images use what ever you have set on the Zenphoto image quality options.
+ * That way their file size is not that much bigger than standard images. The hires images are always compressed at 35% by default
+ * while the standard images use what ever you have set on the Zenphoto image quality options. You can set options to adjust
  *
  * The HiDPI image creation is optionally.
  * 
@@ -44,21 +46,43 @@
 $plugin_is_filter = 9|THEME_PLUGIN;
 $plugin_description = gettext('A plugin to provide higher resolution gallery images to hires screens.');
 $plugin_author = 'Malte Müller (acrylian)';
-$plugin_version = '1.0';
+$plugin_version = '1.1';
+$option_interface = 'zp_picturefill';
 zp_register_filter('theme_head','picturefilljs');
 
+class zp_picturefill {
+
+	function __construct() {
+		setOptionDefault('zp_picturefill_thumbquality', 35);
+		setOptionDefault('zp_picturefill_imagequality', 35);
+	}
+
+	function getOptionsSupported() {
+		array(gettext('HD thumb quality')				 => array('key'		 => 'zp_picturefill_thumbquality', 'type'	 => OPTION_TYPE_TEXTBOX,
+										'order'	 => 2,
+										'desc'	 => gettext('It is recommended to set the HiDPI image to a lower compression as because its resolution it will not be as noticable and will have file size advantages. Default is 35 percent.'),
+					gettext('HD image quality')				 => array('key'		 => 'zp_picturefill_imagequality', 'type'	 => OPTION_TYPE_TEXTBOX,
+										'order'	 => 2,
+										'desc'	 => gettext('It is recommended to set the HiDPI image to a lower compression as because its resolution it will not be as noticable and will have file size advantages. Default is 35 percent.')
+		return $options;											
+	}
+}
+
+
 function picturefilljs() {
-?>
-	<script type="text/javascript" src="<?php echo FULLWEBPATH .'/'.USER_PLUGIN_FOLDER; ?>/zp_picturefill/matchmedia.js"></script>
-	<script type="text/javascript" src="<?php echo FULLWEBPATH .'/'.USER_PLUGIN_FOLDER; ?>/zp_picturefill/picturefill.js"></script>
-<?php
+	?>
+	<script>
+	// Picture element HTML5 shiv
+	document.createElement( "picture" );
+	</script>
+	<script type="text/javascript" src="<?php echo FULLWEBPATH .'/'.USER_PLUGIN_FOLDER; ?>/zp_picturefill/picturefill.min.js"></script>
+	<?php
 }
 
 /***************************
 * Picturefill functions 
 ****************************/
 
-	
 	/**
 	 * Returns the Picturefill html setup for standard, medium and small images, both with optional standard and high density. 
 	 * Since it takes img urls directly, it can be used for non gallery static images on the theme pages, too.
@@ -79,33 +103,63 @@ function picturefilljs() {
 		if(!is_null($class)) $imgclass = ' class="'.$class.'"';
 		if(!is_null($id)) $imgid = ' id="'.$id.'"';
 		//main wrapper
-		$html = '<span'.$imgclass.$imgid.' data-picture data-alt="'.html_encode($alt).'">'."\n";
+		$html = '<picture'.$imgclass.$imgid.' data-picture data-alt="'.html_encode($alt).'">'."\n";
+		
+		//IE bug workaround
+		$html = '<!--[if IE 9]><video style="display: none;"><![endif]-->';
 		
 		//standard desktop size
-		if(!is_null($standard_sd)) $html .= '<span class="image_standard_sd" data-src="'.html_encode(pathurlencode($standard_sd)).'"></span>'."\n";
-		if(!is_null($standard_hd)) $html .= '<span class="image_standard_hd" data-src="'.html_encode(pathurlencode($standard_hd)).'" data-media="(-webkit-min-device-pixel-ratio: 2), (min--moz-device-pixel-ratio: 2), (-o-min-device-pixel-ratio: 2/1), (min-device-pixel-ratio: 2), (min-resolution: 2dppx), (min-resolution: 192dpi)"></span>'."\n";
-			
+		if(!is_null($standard_sd) && !is_null($standard_hd)) {
+			$standard_source = html_encode(pathurlencode($standard_sd)).', '.html_encode(pathurlencode($standard_hd)).' 2x';
+		} else if(!is_null($standard_sd)) {
+			$source_standard_sd = $standard_sd;
+			$standard_source = html_encode(pathurlencode($standard_sd));
+		} else if(!is_null($standard_hd)) { 
+			$standard_source = html_encode(pathurlencode($standard_hd)).' 2x';
+		} 
+		$html .= '<source class="image_standard" srcset="'.$standard_source.'">';
+	
 		//medium "tablet" size
-		if(!is_null($medium_sd)) $html .= '<span class="image_medium_sd" data-src="'.html_encode(pathurlencode($medium_sd)).'" data-media="(max-width: 767px)"></span>'."\n";
-		if(!is_null($medium_hd)) $html .= '<span class="image_medium_hd" data-src="'.html_encode(pathurlencode($medium_hd)).'" data-media="(max-width: 767px) and (-webkit-min-device-pixel-ratio: 2), (max-width: 767px) and (min--moz-device-pixel-ratio: 2), (max-width: 767px) and (-o-min-device-pixel-ratio: 2/1), (max-width: 767px) and (min-device-pixel-ratio: 2), (min-resolution: 2dppx), (max-width: 767px) and (min-resolution: 192dpi)"></span>'."\n";
-			
+		if(!is_null($medium_sd) && !is_null($medium_hd)) {
+			$html .= '<source class="image_medium" srcset="'.html_encode(pathurlencode($medium_sd)).', '.$medium_hd.' 2x" media="(max-width: 767px)">';
+		} else if(!is_null($standard_sd)) {
+			$html .= '<source class="image_medium" srcset="'.html_encode(pathurlencode($medium_sd)).'" media="(max-width: 767px)">';
+		} else if(!is_null($standard_hd)) { 
+			$html .= '<source class="image_medium" srcset="'.html_encode(pathurlencode($medium_hd)).' 2x" media="(max-width: 767px)">';
+		} 
+		
 		//small "mobile" size
-		if(!is_null($small_sd)) $html .= '<span class="image_small_sd" data-src="'.html_encode(pathurlencode($small_sd)).'" data-media="(max-width: 479px)"></span>'."\n";
-		if(!is_null($small_hd)) $html .='	<span class="image_small_hd" data-src="'.html_encode(pathurlencode($small_hd)).'" data-media="(max-width: 479px) and (-webkit-min-device-pixel-ratio: 2), (max-width: 767px) and (min--moz-device-pixel-ratio: 2), (max-width: 767px) and (-o-min-device-pixel-ratio: 2/1), (max-width: 767px) and (min-device-pixel-ratio: 2), (max-width: 767px) and (min-resolution: 2dppx), (max-width: 767px) and (min-resolution: 192dpi)"></span>'."\n";
-			
-		//fall backs for old IEs and non JS
-		$html .= '
-			<!--[if (lt IE 9) & (!IEMobile)]>'."\n".'
-				<span'.$imgclass.$imgid.' data-src="'.html_encode(pathurlencode($standard_sd)).'"></span>'."\n".'
-			<![endif]-->'."\n".'
-			
-			<!-- Fallback content for non-JS browsers. Same img src as the initial, unqualified source element. -->'."\n".'
-			<noscript>'."\n".'
-				<img'.$imgclass.$imgid.' src="'.html_encode(pathurlencode($standard_sd)).'" alt="'.html_encode($alt).'">'."\n".'
-			</noscript>'."\n".'
-		</span>'."\n".'
+		if(!is_null($small_sd) && !is_null($small_hd)) {
+			$html .= '<source class="image_small" srcset="'.html_encode(pathurlencode($small_sd)).', '.html_encode(pathurlencode($small_hd)).' 2x" media="(max-width: 479px)">';
+		} else if(!is_null($standard_sd)) {
+			$html .= '<source class="image_small" srcset="'.html_encode(pathurlencode($small_sd)).'" media="(max-width: 767px)">';
+		} else if(!is_null($standard_hd)) { 
+			$html .= '<source class="image_small" srcset="'.html_encode(pathurlencode($small_hd)).' 2x" media="(max-width: 767px)">';
+		} 
+		
+		//fall backs for old IEs
+		$html .= '<!--[if IE 9]></video><![endif]-->'."\n";
+		$html .= '<img srcset="'.$standard_source.'" alt="'.$alt.'">';
+		
+		$html .= '</picture>'."\n".'
 		';
 		return $html;
+	}
+	
+	/**
+	 * Helper function to get the quality option setting for the HD images
+	 * @param bool $thumb true for thumb quality, false for sized image quality
+	 */
+	function getHDQuality($thumb=true) {
+		if($thumb) {
+			$quality = getOption('zp_picturefill_thumbquality');
+		} else {
+			$quality = getOption('zp_picturefill_imagequality');
+		}
+		if(empty($quality) {
+			$quality = 35;
+		}
+		return $quality
 	}
 
 	/**
@@ -275,7 +329,7 @@ function picturefilljs() {
 			$ch2 = $croph*2;
 			$cx2 = $cropx*2;
 			$cy2 = $cropy*2;
-			setOption('image_quality', 35,false); // more compression for the hires to save file size
+			setOption('image_quality', getHDQuality(false),false); // more compression for the hires to save file size
 			$img_hd = $imgobj->getCustomImage($s2, $w2, $h2, $cw2, $ch2, $cx2, $cy2, $thumbStandin, $effects);
 		}
 		return array($img_sd, $img_hd);
@@ -306,9 +360,9 @@ function picturefilljs() {
 			$h2 = $height * 2;
 			getMaxSpaceContainer($w2, $h2, $imgobj);
 			if($thumb) { // more compression for the hires to save file size
-				setOption('thumb_quality', 35,false); 
+				setOption('thumb_quality', getHDQuality(true),false); 
 			} else {
-				setOption('image_quality', 35,false); 
+				setOption('image_quality', getHDQuality(false),false); 
 			}
 			$img_hd = $imgobj->getCustomImage(NULL, $w2, $h2, NULL, NULL, NULL, NULL, $thumb, NULL);
 		}
@@ -340,7 +394,7 @@ function picturefilljs() {
 	  $img_hd = NULL;
 		if($hd) {
 			$size2 = $size*2;
-			setOption('image_quality',35,false); // more compression for the hires to save file size
+			setOption('image_quality', getHDQuality(false), false); // more compression for the hires to save file size
 			$img_hd = $imgobj->getSizedImage($size2);
 		}
 		return array($img_sd, $img_hd);
@@ -381,7 +435,7 @@ function picturefilljs() {
 		$cropw2 = setOption('thumb_crop_width',$cropw*2,false);
 		$croph2 = setOption('thumb_crop_height',$croph2*2,false);
 		$thumbsize2 = setOption('thumb_size',$thumbsize2*2,false);
-		setOption('thumb_quality', 35,false); // more compression for the hires to save file size
+		setOption('thumb_quality', getHDQuality(true),false); // more compression for the hires to save file size
 		$img_hd = $imgobj->getThumb();
 		return array($img_sd, $img_hd);
 	}
