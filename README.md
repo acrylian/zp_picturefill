@@ -6,7 +6,7 @@ and HiDPI ("Retina") counter parts
  
 An adaption of Picturefill by Scott Jehl - https://github.com/scottjehl/picturefill
 
-**Note: This is version 1 - Update to 2 is planned for later**
+**Note: This is now the new version 2.0**
  
 Responsive breakpoints
 -----------------------
