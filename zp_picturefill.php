@@ -57,7 +57,7 @@ class zp_picturefill {
   }
 
   function getOptionsSupported() {
-    array(gettext('HD thumb quality') => array('key' => 'zp_picturefill_thumbquality', 'type' => OPTION_TYPE_TEXTBOX,
+    $options = array(gettext('HD thumb quality') => array('key' => 'zp_picturefill_thumbquality', 'type' => OPTION_TYPE_TEXTBOX,
             'order' => 2,
             'desc' => gettext('It is recommended to set the HiDPI image to a lower compression as because its resolution it will not be as noticable and will have file size advantages. Default is 35 percent.')),
         gettext('HD image quality') => array('key' => 'zp_picturefill_imagequality', 'type' => OPTION_TYPE_TEXTBOX,
@@ -108,7 +108,7 @@ function getResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd
   $html = '<picture' . $imgclass . $imgid . ' data-picture data-alt="' . html_encode($alt) . '">' . "\n";
 
   //IE bug workaround
-  $html = '<!--[if IE 9]><video style="display: none;"><![endif]-->';
+  $html .= '<!--[if IE 9]><video style="display: none;"><![endif]-->';
 
   //standard desktop size
   if (!is_null($standard_sd) && !is_null($standard_hd)) {
@@ -322,6 +322,7 @@ function getHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $heig
   }
   $img_sd = $imgobj->getCustomImage($size, $width, $height, $cropw, $croph, $cropx, $cropy, $thumbStandin, $effects);
   $img_hd = NULL;
+  $imagequality = getOption('image_quality');
   if ($hd) {
     $s2 = $size * 2;
     $w2 = $width * 2;
@@ -332,6 +333,7 @@ function getHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $heig
     $cy2 = $cropy * 2;
     setOption('image_quality', getHDQuality(false), false); // more compression for the hires to save file size
     $img_hd = $imgobj->getCustomImage($s2, $w2, $h2, $cw2, $ch2, $cx2, $cy2, $thumbStandin, $effects);
+    setOption('image_quality',$imagequality,false); // reset for standard images
   }
   return array($img_sd, $img_hd);
 }
@@ -355,6 +357,8 @@ function getHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, $t
   getMaxSpaceContainer($width, $height, $imgobj);
   $img_sd = $imgobj->getCustomImage(NULL, $width, $height, NULL, NULL, NULL, NULL, $thumb, $effects);
   $img_hd = NULL;
+  $thumbquality = getOption('thumb_quality');
+  $imagequality = getOption('image_quality');
   if ($hd) {
     $w2 = $width * 2;
     $h2 = $height * 2;
@@ -365,6 +369,9 @@ function getHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, $t
       setOption('image_quality', getHDQuality(false), false);
     }
     $img_hd = $imgobj->getCustomImage(NULL, $w2, $h2, NULL, NULL, NULL, NULL, $thumb, NULL);
+    // reset for standard images
+    setOption('thumb_quality',$thumbquality,false);
+    setOption('image_quality',$imagequality,false);
   }
   return array($img_sd, $img_hd);
 }
@@ -390,12 +397,14 @@ function getHDDefaultSizedImage($imgobj, $hd = false) {
   //standard
   $size = getOption('image_size');
   $img_sd = $imgobj->getSizedImage($size);
+  $imagequality = getOption('image_quality');
   //hires
   $img_hd = NULL;
   if ($hd) {
     $size2 = $size * 2;
     setOption('image_quality', getHDQuality(false), false); // more compression for the hires to save file size
     $img_hd = $imgobj->getSizedImage($size2);
+    setOption('image_quality', $imagequality, false); // reset for standard images
   }
   return array($img_sd, $img_hd);
 }
@@ -431,6 +440,7 @@ function getHDImageThumb($imgobj = null, $hd = false) {
   $cropw = getOption('thumb_crop_width');
   $croph = getOption('thumb_crop_height');
   $thumbsize = getOption('thumb_size');
+  $thumbquality = getOption('thumb_quality');
   $img_sd = $imgobj->getThumb();
   //hires
   $img_hd = NULL;
@@ -440,6 +450,11 @@ function getHDImageThumb($imgobj = null, $hd = false) {
     setOption('thumb_size', $thumbsize * 2, false);
     setOption('thumb_quality', getHDQuality(true), false); // more compression for the hires to save file size
     $img_hd = $imgobj->getThumb();
+    // reset for standard images
+    $cropw = setOption('thumb_crop_width',$cropw,false);
+    $croph = getOption('thumb_crop_height',$croph,false);
+    $thumbsize = setOption('thumb_size', $thumbsize, false);
+    $thumbquality = setOption('thumb_quality', $thumbquality, false);
   }
   return array($img_sd, $img_hd);
 }
@@ -453,7 +468,7 @@ function getHDImageThumb($imgobj = null, $hd = false) {
  * @param string $class optional class tag
  * @param string $id optional id tag
  */
-function printHDImageThumb($alt, $hd = false, $alt = NULL, $class = NULL, $id = NULL, $imgobj = null) {
+function printHDImageThumb($hd = false, $alt = NULL, $class = NULL, $id = NULL, $imgobj = null) {
   $img = getHDImageThumb($imgobj, $hd);
   printResponsiveImage($img[0], $img[1], NULL, NULL, NULL, NULL, $class, $id, $alt);
 }
