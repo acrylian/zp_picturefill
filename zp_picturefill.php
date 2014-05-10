@@ -147,7 +147,6 @@ function getResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd
   if (!is_null($standard_sd) && !is_null($standard_hd)) {
     $standard_source = html_encode(pathurlencode($standard_sd['url'])) . ', ' . html_encode(pathurlencode($standard_hd['url'])) . ' 2x';
   } else if (!is_null($standard_sd)) {
-    $source_standard_sd = $standard_sd['url'];
     $standard_source = html_encode(pathurlencode($standard_sd['url']));
   } else if (!is_null($standard_hd['url'])) {
     $standard_source = html_encode(pathurlencode($standard_hd['url'])) . ' 2x';
@@ -372,14 +371,12 @@ function getHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $heig
     $imgobj = $_zp_current_image;
   }
   $img_sd_size = getSizeCustomImage($size, $width, $height, $cropw, $croph, $cropx, $cropy, $imgobj);
-  $img_sd = array('img_sd' =>
-      array(
-          'url' => $imgobj->getCustomImage($size, $width, $height, $cropw, $croph, $cropx, $cropy, $thumbStandin, $effects),
-          'width' => $img_sd_size[0],
-          'height' => $img_sd_size[1]
-      )
+  $imgs['img_sd'] = array(
+              'url' => $imgobj->getCustomImage($size, $width, $height, $cropw, $croph, $cropx, $cropy, $thumbStandin, $effects),
+              'width' => $img_sd_size[0],
+              'height' => $img_sd_size[1]
   );
-  $img_hd = NULL;
+  $imgs['img_hd'] = NULL;
   $imagequality = getOption('image_quality');
   if ($hd) {
     $s2 = $size * 2;
@@ -391,14 +388,12 @@ function getHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $heig
     $cy2 = $cropy * 2;
     setOption('image_quality', getHDQuality(false), false); // more compression for the hires to save file size
     $img_hd_size = getSizeCustomImage($s2, $w2, $h2, $cw2, $ch2, $cx2, $cy2, $imgobj);
-    $img_hd = array('img_hd' =>
-        array(
-            'url' => $imgobj->getCustomImage($s2, $w2, $h2, $cw2, $ch2, $cx2, $cy2, $thumbStandin, $effects),
-            'width' => $img_hd_size[0],
-            'height' => $img_hd_size[1]
-        )
+    $imgs['img_hd'] = array(
+        'url' => $imgobj->getCustomImage($s2, $w2, $h2, $cw2, $ch2, $cx2, $cy2, $thumbStandin, $effects),
+        'width' => $img_hd_size[0],
+        'height' => $img_hd_size[1]
     );
-    setOption('image_quality',$imagequality,false); // reset for standard images
+    setOption('image_quality', $imagequality, false); // reset for standard images
   }
   return array($img_sd, $img_hd);
 }
@@ -420,14 +415,12 @@ function getHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, $t
     $imgobj = $_zp_current_image;
   }
   getMaxSpaceContainer($width, $height, $imgobj);
-  $img_sd = array('img_sd' =>
-      array(
-          'url' => $imgobj->getCustomImage(NULL, $width, $height, NULL, NULL, NULL, NULL, $thumb, $effects),
-          'width' => $width,
-          'height' => $height
-      )
+  $imgs['img_sd'] = array(
+              'url' => $imgobj->getCustomImage(NULL, $width, $height, NULL, NULL, NULL, NULL, $thumb, $effects),
+              'width' => $width,
+              'height' => $height
   );
-  $img_hd = NULL;
+  $imgs['img_hd'] = NULL;
   $thumbquality = getOption('thumb_quality');
   $imagequality = getOption('image_quality');
   if ($hd) {
@@ -439,18 +432,16 @@ function getHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, $t
     } else {
       setOption('image_quality', getHDQuality(false), false);
     }
-    $img_hd = array('img_hd' =>
-        array(
-            'url' => $imgobj->getCustomImage(NULL, $w2, $h2, NULL, NULL, NULL, NULL, $thumb, $effects),
-            'width' => $w2,
-            'height' => $h2
-        )
+    $imgs['img_hd'] = array(
+                'url' => $imgobj->getCustomImage(NULL, $w2, $h2, NULL, NULL, NULL, NULL, $thumb, $effects),
+                'width' => $w2,
+                'height' => $h2
     );
     // reset for standard images
     setOption('thumb_quality',$thumbquality,false);
     setOption('image_quality',$imagequality,false);
   }
-  return array($img_sd, $img_hd);
+  return $imgs;
 }
 
 /* * ***********************************************
@@ -474,30 +465,27 @@ function getHDDefaultSizedImage($imgobj, $hd = false) {
   //standard
   $size = getOption('image_size');
   $img_sd_size = getSizeDefaultImage($size, $imgobj);
-  $img_sd = array('img_sd' =>
+  $imgs['img_sd'] =
       array(
           'url' => $imgobj->getSizedImage($size),
           'width' => $img_sd_size[0],
           'height' => $img_sd_size[1]
-      )
-  );
+      );
   $imagequality = getOption('image_quality');
   //hires
-  $img_hd = NULL;
+  $imgs['img_hd'] = NULL;
   if ($hd) {
     $size2 = $size * 2;
     setOption('image_quality', getHDQuality(false), false); // more compression for the hires to save file size
     $img_hd_size = getSizeDefaultImage($size2, $imgobj);
-    $img_hd = array('img_hd' =>
-        array(
-            'url' => $imgobj->getSizedImage($size2),
-            'width' => $img_hd_size[0],
-            'height' => $img_hd_size[1]
-        )
+    $imgs['img_hd'] = array(
+        'url' => $imgobj->getSizedImage($size2),
+        'width' => $img_hd_size[0],
+        'height' => $img_hd_size[1]
     );
     setOption('image_quality', $imagequality, false); // reset for standard images
   }
-  return array($img_sd, $img_hd);
+  return $imgs;
 }
 
 /**
@@ -533,15 +521,13 @@ function getHDImageThumb($imgobj = null, $hd = false) {
   $thumbsize = getOption('thumb_size');
   $thumbquality = getOption('thumb_quality');
   $img_sd_size = getSizeDefaultThumb($imgobj);
-  $img_sd = array('img_sd' =>
-      array(
-          'url' => $imgobj->getThumb(),
-          'width' => $img_sd_size[0],
-          'height' => $img_sd_size[1]
-      )
+  $imgs['img_sd'] = array(
+              'url' => $imgobj->getThumb(),
+              'width' => $img_sd_size[0],
+              'height' => $img_sd_size[1]
   );
   //hires
-  $img_hd = NULL;
+  $imgs['img_hd'] = NULL;
   if ($hd) {
     setOption('thumb_crop_width', $cropw * 2, false);
     setOption('thumb_crop_height', $croph * 2, false);
@@ -549,20 +535,18 @@ function getHDImageThumb($imgobj = null, $hd = false) {
     setOption('thumb_quality', getHDQuality(true), false); // more compression for the hires to save file size
     $img_hd = $imgobj->getThumb();
     $img_hd_size = getSizeDefaultThumb($imgobj);
-    $img_hd = array('img_hd' =>
-        array(
-            'url' => $imgobj->getThumb(),
-            'width' => $img_hd_size[0],
-            'height' => $img_hd_size[1]
-        )
+    $imgs['img_hd'] = array(
+        'url' => $imgobj->getThumb(),
+        'width' => $img_hd_size[0],
+        'height' => $img_hd_size[1]
     );
     // reset for standard images
-    $cropw = setOption('thumb_crop_width',$cropw,false);
-    $croph = getOption('thumb_crop_height',$croph,false);
+    $cropw = setOption('thumb_crop_width', $cropw, false);
+    $croph = getOption('thumb_crop_height', $croph, false);
     $thumbsize = setOption('thumb_size', $thumbsize, false);
     $thumbquality = setOption('thumb_quality', $thumbquality, false);
   }
-  return array($img_sd, $img_hd);
+  return $imgs;
 }
 
 /**
