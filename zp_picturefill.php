@@ -7,7 +7,7 @@
  *
  * Responsive breakpoints:
  * These three are setup by default:
- * Standard: For normal desktop usage (aka "large")
+ * Standard: For normal desktop usage (aka "large") - Always set at least this!
  * Medium: For smaller "tablet" screens max-width 767px
  * Small: For small "mobile" screens with max-width 479px
  * 
@@ -34,6 +34,19 @@
  * The HiDPI image creation is optionally.
  * 
  * Usage:
+ * Template functions for normal and high density default images - only standard sizes
+ * get/printHDDefaultSizedImage(); get/printHDImageThumb()
+ * 
+ * Template functions for custom sized 
+ * get/printResponsiveCustomSizedImage()(
+
+ * Use these to pass specific sizes to the above manually
+ * getHDCustomSizedImage(), getHDCustomSizedImageMaxSpace()
+ *
+ * These are the base function to create/print the <picture> setup for the responsive image itself.
+ * You can use these with static non gallery images on your theme as well, given you have ready made images-
+ * get/printResponsiveImage()
+ * 
  * Please see the in file comments on the functions itself for usage information below.
  *
  * @license GPL v3 
@@ -85,9 +98,27 @@ function picturefilljs() {
 
 /**
  * Returns the Picturefill html setup for standard, medium and small images, both with optional standard and high density. 
- * Since it takes img urls directly, it can be used for non gallery static images on the theme pages, too.
+ * It can be used for non gallery static images on the theme pages, too.
+ * Note each standard/medium/small parameter requires an multidimensional array as returnd by the plugin's getXXX functions:
+ * array(
+ *  'img_sd' => 
+ *    array(
+ *      'url' => '<full url of the image', 
+ *      'width' => '<width in px>', 
+ *      'height' => '<height in px>'
+ *    )
+ * 	)
+ * respectively for the HiDPI image:
+ * array(
+ *  'img_hd' => 
+ *    array(
+ *      'url' => '<full url of the image', 
+ *      'width' => '<width in px>', 
+ *      'height' => '<height in px>'
+ *    )
+ * 	)
  *
- * @param string $standard_sd Url to the normal image for desktop screens in single density
+ * @param string $standard_sd Url to the normal image for desktop screens in single density - Always set at least this!
  * @param string $standard_hd Url to the normal image for desktop screens in high density
  * @param string $medium_sd Url to the medium image for smaller screens (max-width: 767px) in single density
  * @param string $medium_hd Url to the medium image for smaller screens (max-width: 767px) in high density
@@ -100,10 +131,12 @@ function picturefilljs() {
 function getResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd = NULL, $medium_hd = NULL, $small_sd = NULL, $small_hd = NULL, $class = NULL, $id = NULL, $alt = NULL) {
   $imgclass = '';
   $imgid = '';
-  if (!is_null($class))
+  if (!is_null($class)) {
     $imgclass = ' class="' . $class . '"';
-  if (!is_null($id))
+  }
+  if (!is_null($id)) {
     $imgid = ' id="' . $id . '"';
+  }
   //main wrapper
   $html = '<picture' . $imgclass . $imgid . ' data-picture data-alt="' . html_encode($alt) . '">' . "\n";
 
@@ -112,36 +145,36 @@ function getResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd
 
   //standard desktop size
   if (!is_null($standard_sd) && !is_null($standard_hd)) {
-    $standard_source = html_encode(pathurlencode($standard_sd)) . ', ' . html_encode(pathurlencode($standard_hd)) . ' 2x';
+    $standard_source = html_encode(pathurlencode($standard_sd['url'])) . ', ' . html_encode(pathurlencode($standard_hd['url'])) . ' 2x';
   } else if (!is_null($standard_sd)) {
-    $source_standard_sd = $standard_sd;
-    $standard_source = html_encode(pathurlencode($standard_sd));
-  } else if (!is_null($standard_hd)) {
-    $standard_source = html_encode(pathurlencode($standard_hd)) . ' 2x';
+    $source_standard_sd = $standard_sd['url'];
+    $standard_source = html_encode(pathurlencode($standard_sd['url']));
+  } else if (!is_null($standard_hd['url'])) {
+    $standard_source = html_encode(pathurlencode($standard_hd['url'])) . ' 2x';
   }
   $html .= '<source class="image_standard" srcset="' . $standard_source . '">';
 
   //medium "tablet" size
   if (!is_null($medium_sd) && !is_null($medium_hd)) {
-    $html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_sd)) . ', ' . $medium_hd . ' 2x" media="(max-width: 767px)">';
+    $html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_sd['url'])) . ', ' . html_encode(pathurlencode($medium_hd['url'])) . ' 2x" media="(max-width: 767px)">';
   } else if (!is_null($standard_sd)) {
-    $html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_sd)) . '" media="(max-width: 767px)">';
+    $html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_sd['url'])) . '" media="(max-width: 767px)">';
   } else if (!is_null($standard_hd)) {
-    $html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_hd)) . ' 2x" media="(max-width: 767px)">';
+    $html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_hd['url'])) . ' 2x" media="(max-width: 767px)">';
   }
 
   //small "mobile" size
   if (!is_null($small_sd) && !is_null($small_hd)) {
-    $html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_sd)) . ', ' . html_encode(pathurlencode($small_hd)) . ' 2x" media="(max-width: 479px)">';
+    $html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_sd['url'])) . ', ' . html_encode(pathurlencode($small_hd['url'])) . ' 2x" media="(max-width: 479px)">';
   } else if (!is_null($standard_sd)) {
-    $html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_sd)) . '" media="(max-width: 767px)">';
+    $html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_sd['url'])) . '" media="(max-width: 767px)">';
   } else if (!is_null($standard_hd)) {
-    $html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_hd)) . ' 2x" media="(max-width: 767px)">';
+    $html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_hd['url'])) . ' 2x" media="(max-width: 767px)">';
   }
 
   //fall backs for old IEs
   $html .= '<!--[if IE 9]></video><![endif]-->' . "\n";
-  $html .= '<img srcset="' . $standard_source . '" alt="' . $alt . '">';
+  $html .= '<img srcset="' . html_encode(pathurlencode($standard_sd['url'])) . '" width="'.$standard_sd['width'].'" height="'.$standard_sd['height'].'"alt="' . $alt . '">';
 
   $html .= '</picture>' . "\n";
   return $html;
@@ -165,9 +198,27 @@ function getHDQuality($thumb = true) {
 
 /**
  * Prints the Picturefill html setup for standard, medium and small images, both with optional standard and high density. 
- * Since it takes img urls directly, it can be used for non gallery static images on the theme pages, too.
+ * It can be used for non gallery static images on the theme pages, too.
+ * Note each standard/medium/small parameter requires an multidimensional array as returnd by the plugin's getXXX functions:
+ * array(
+ *  'img_sd' => 
+ *    array(
+ *      'url' => '<full url of the image', 
+ *      'width' => '<width in px>', 
+ *      'height' => '<height in px>'
+ *    )
+ * 	)
+ * respectively for the HiDPI image:
+ * array(
+ *  'img_hd' => 
+ *    array(
+ *      'url' => '<full url of the image', 
+ *      'width' => '<width in px>', 
+ *      'height' => '<height in px>'
+ *    )
+ * 	)
  *
- * @param string $standard_sd Url to the normal image for desktop screens in single density
+ * @param string $standard_sd Url to the normal image for desktop screens in single density - Always set at least this!
  * @param string $standard_hd Url to the normal image for desktop screens in high density
  * @param string $medium_sd Url to the medium image for smaller screens (max-width: 767px) in single density
  * @param string $medium_hd Url to the medium image for smaller screens (max-width: 767px) in high density
@@ -199,7 +250,7 @@ function printResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_
  * 	'medium' => array($width, $height),
  * 	'small' => array($width, $height)
  * );
- * All parameters must be set for each type used at least to NULL.
+ * All parameters must be set for each type used at least to NULL. Always set at least the standard size!
  *
  * @param obj $imgobj Image object
  * @param array $imgsettings Array containing the imagesettings for the standard, medium and small images. 
@@ -208,7 +259,7 @@ function printResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_
  * @param bool $thumbStandin set to true to treat as thumbnail
  * @param bool $effects image effects (e.g. set gray to force grayscale) 
  */
-function getResponsiveCustomSizedImage($imgobj = null, $imgsettings, $hd = false, $maxspace = false, $thumbStandin = false, $effects = NULL) {
+function getResponsiveCustomSizedImage($imgobj = NULL, $imgsettings, $hd = false, $maxspace = false, $thumbStandin = false, $effects = NULL) {
   global $_zp_current_image;
   if (!is_object($imgobj)) {
     $imgobj = $_zp_current_image;
@@ -221,7 +272,7 @@ function getResponsiveCustomSizedImage($imgobj = null, $imgsettings, $hd = false
       } else {
         $img = getHDCustomSizedImage($imgobj, $hd, $val[0], $val[1], $val[2], $val[3], $val[4], $val[5], $val[6], $thumbStandin, $effects);
       }
-      $array = array($key => array($img[0], $img[1]));
+      $array = array($key => array('img_sd' => $img['img_sd'], 'img_hd' => $img['img_hd']));
       $images = array_merge($array, $images);
     }
   }
@@ -267,7 +318,7 @@ function getResponsiveCustomSizedImage($imgobj = null, $imgsettings, $hd = false
  * 	'medium' => array($width, $height),
  * 	'small' => array($width, $height)
  * );
- * All parameters must be set for each type used at least to NULL.
+ * All parameters must be set for each type used at least to NULL. Always set at least the standard size!
  *
  * @param obj $imgobj Image object If NULL the current image is used
  * @param bool $hd Set to true if you want the high density counterparts
@@ -282,12 +333,12 @@ function getResponsiveCustomSizedImage($imgobj = null, $imgsettings, $hd = false
  */
 function printResponsiveCustomSizedImage($imgobj, $hd = false, $maxspace = false, $alt, $imgsettings, $class = NULL, $id = NULL, $thumbStandin = false, $effects = NULL) {
   $images = getResponsiveCustomSizedImage($imgobj, $imgsettings, $hd, $maxspace, $thumbStandin, $effects);
-  $standard_sd = $images['standard'][0];
-  $standard_hd = $images['standard'][1];
-  $medium_sd = $images['medium'][0];
-  $medium_hd = $images['medium'][1];
-  $small_sd = $images['small'][0];
-  $small_hd = $images['small'][1];
+  $standard_sd = $images['standard']['img_sd'];
+  $standard_hd = $images['standard']['img_hd'];
+  $medium_sd = $images['medium']['img_sd'];
+  $medium_hd = $images['medium']['img_hd'];
+  $small_sd = $images['small']['img_sd'];
+  $small_hd = $images['small']['img_hd'];
   printResponsiveImage($standard_sd, $standard_hd, $medium_sd, $medium_hd, $small_sd, $small_hd, $class, $id, $alt);
 }
 
@@ -320,7 +371,14 @@ function getHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $heig
   if (!is_object($imgobj)) {
     $imgobj = $_zp_current_image;
   }
-  $img_sd = $imgobj->getCustomImage($size, $width, $height, $cropw, $croph, $cropx, $cropy, $thumbStandin, $effects);
+  $img_sd_size = getSizeCustomImage($size, $width, $height, $cropw, $croph, $cropx, $cropy, $imgobj);
+  $img_sd = array('img_sd' =>
+      array(
+          'url' => $imgobj->getCustomImage($size, $width, $height, $cropw, $croph, $cropx, $cropy, $thumbStandin, $effects),
+          'width' => $img_sd_size[0],
+          'height' => $img_sd_size[1]
+      )
+  );
   $img_hd = NULL;
   $imagequality = getOption('image_quality');
   if ($hd) {
@@ -332,7 +390,14 @@ function getHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $heig
     $cx2 = $cropx * 2;
     $cy2 = $cropy * 2;
     setOption('image_quality', getHDQuality(false), false); // more compression for the hires to save file size
-    $img_hd = $imgobj->getCustomImage($s2, $w2, $h2, $cw2, $ch2, $cx2, $cy2, $thumbStandin, $effects);
+    $img_hd_size = getSizeCustomImage($s2, $w2, $h2, $cw2, $ch2, $cx2, $cy2, $imgobj);
+    $img_hd = array('img_hd' =>
+        array(
+            'url' => $imgobj->getCustomImage($s2, $w2, $h2, $cw2, $ch2, $cx2, $cy2, $thumbStandin, $effects),
+            'width' => $img_hd_size[0],
+            'height' => $img_hd_size[1]
+        )
+    );
     setOption('image_quality',$imagequality,false); // reset for standard images
   }
   return array($img_sd, $img_hd);
@@ -355,7 +420,13 @@ function getHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, $t
     $imgobj = $_zp_current_image;
   }
   getMaxSpaceContainer($width, $height, $imgobj);
-  $img_sd = $imgobj->getCustomImage(NULL, $width, $height, NULL, NULL, NULL, NULL, $thumb, $effects);
+  $img_sd = array('img_sd' =>
+      array(
+          'url' => $imgobj->getCustomImage(NULL, $width, $height, NULL, NULL, NULL, NULL, $thumb, $effects),
+          'width' => $width,
+          'height' => $height
+      )
+  );
   $img_hd = NULL;
   $thumbquality = getOption('thumb_quality');
   $imagequality = getOption('image_quality');
@@ -368,7 +439,13 @@ function getHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, $t
     } else {
       setOption('image_quality', getHDQuality(false), false);
     }
-    $img_hd = $imgobj->getCustomImage(NULL, $w2, $h2, NULL, NULL, NULL, NULL, $thumb, NULL);
+    $img_hd = array('img_hd' =>
+        array(
+            'url' => $imgobj->getCustomImage(NULL, $w2, $h2, NULL, NULL, NULL, NULL, $thumb, $effects),
+            'width' => $w2,
+            'height' => $h2
+        )
+    );
     // reset for standard images
     setOption('thumb_quality',$thumbquality,false);
     setOption('image_quality',$imagequality,false);
@@ -396,14 +473,28 @@ function getHDDefaultSizedImage($imgobj, $hd = false) {
   }
   //standard
   $size = getOption('image_size');
-  $img_sd = $imgobj->getSizedImage($size);
+  $img_sd_size = getSizeDefaultImage($size, $imgobj);
+  $img_sd = array('img_sd' =>
+      array(
+          'url' => $imgobj->getSizedImage($size),
+          'width' => $img_sd_size[0],
+          'height' => $img_sd_size[1]
+      )
+  );
   $imagequality = getOption('image_quality');
   //hires
   $img_hd = NULL;
   if ($hd) {
     $size2 = $size * 2;
     setOption('image_quality', getHDQuality(false), false); // more compression for the hires to save file size
-    $img_hd = $imgobj->getSizedImage($size2);
+    $img_hd_size = getSizeDefaultImage($size2, $imgobj);
+    $img_hd = array('img_hd' =>
+        array(
+            'url' => $imgobj->getSizedImage($size2),
+            'width' => $img_hd_size[0],
+            'height' => $img_hd_size[1]
+        )
+    );
     setOption('image_quality', $imagequality, false); // reset for standard images
   }
   return array($img_sd, $img_hd);
@@ -421,7 +512,7 @@ function getHDDefaultSizedImage($imgobj, $hd = false) {
  */
 function printHDDefaultSizedImage($imgobj, $hd = false, $alt = NULL, $class = NULL, $id = NULL) {
   $img = getHDDefaultSizedImage($imgobj, $hd);
-  printResponsiveImage($img[0], $img[1], NULL, NULL, NULL, NULL, $class, $id, $alt);
+  printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt);
 }
 
 /**
@@ -441,7 +532,14 @@ function getHDImageThumb($imgobj = null, $hd = false) {
   $croph = getOption('thumb_crop_height');
   $thumbsize = getOption('thumb_size');
   $thumbquality = getOption('thumb_quality');
-  $img_sd = $imgobj->getThumb();
+  $img_sd_size = getSizeDefaultThumb($imgobj);
+  $img_sd = array('img_sd' =>
+      array(
+          'url' => $imgobj->getThumb(),
+          'width' => $img_sd_size[0],
+          'height' => $img_sd_size[1]
+      )
+  );
   //hires
   $img_hd = NULL;
   if ($hd) {
@@ -450,6 +548,14 @@ function getHDImageThumb($imgobj = null, $hd = false) {
     setOption('thumb_size', $thumbsize * 2, false);
     setOption('thumb_quality', getHDQuality(true), false); // more compression for the hires to save file size
     $img_hd = $imgobj->getThumb();
+    $img_hd_size = getSizeDefaultThumb($imgobj);
+    $img_hd = array('img_hd' =>
+        array(
+            'url' => $imgobj->getThumb(),
+            'width' => $img_hd_size[0],
+            'height' => $img_hd_size[1]
+        )
+    );
     // reset for standard images
     $cropw = setOption('thumb_crop_width',$cropw,false);
     $croph = getOption('thumb_crop_height',$croph,false);
@@ -462,14 +568,14 @@ function getHDImageThumb($imgobj = null, $hd = false) {
 /**
  * Standard thumb as set on the options
  *
- * @param obj $imgobj Image object 
  * @param bool $hd Set to true if the HiDPI counterpart should be generated
  * @param string $alt Alt text
  * @param string $class optional class tag
  * @param string $id optional id tag
+ * @param string $imgobj Image object 
  */
 function printHDImageThumb($hd = false, $alt = NULL, $class = NULL, $id = NULL, $imgobj = null) {
   $img = getHDImageThumb($imgobj, $hd);
-  printResponsiveImage($img[0], $img[1], NULL, NULL, NULL, NULL, $class, $id, $alt);
+  printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt);
 }
 ?>
