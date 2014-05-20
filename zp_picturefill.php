@@ -35,19 +35,25 @@
  * 
  * Usage:
  * Template functions for normal and high density default images - only standard sizes
- * get/printHDDefaultSizedImage(); get/printHDImageThumb()
+ * - get/printHDDefaultSizedImage() 
+ * - get/printHDImageThumb()
+ * - printHDAlbumThumbImage()
  * 
  * Template functions for custom sized 
- * get/printResponsiveCustomSizedImage()(
+ * - get/printResponsiveCustomSizedImage()
 
  * Use these to pass specific sizes to the above manually
- * getHDCustomSizedImage(), getHDCustomSizedImageMaxSpace()
+ * - getHDCustomSizedImage()
+ * - getHDCustomSizedImageMaxSpace()
  *
  * These are the base function to create/print the <picture> setup for the responsive image itself.
  * You can use these with static non gallery images on your theme as well, given you have ready made images-
- * get/printResponsiveImage()
+ * - get/printResponsiveImage()
  * 
  * Please see the in file comments on the functions itself for usage information below.
+ * 
+ * IMPORTANT NOTE: 
+ * Because of the different HTML structure of the <picture> element these functions DO NOT support Zenphoto's standard image HTML filters.
  *
  * @license GPL v3 
  * @author Malte Müller (acrylian)
@@ -58,7 +64,7 @@
 $plugin_is_filter = 9 | THEME_PLUGIN;
 $plugin_description = gettext('A plugin to provide higher resolution gallery images to hires screens.');
 $plugin_author = 'Malte Müller (acrylian)';
-$plugin_version = '1.1';
+$plugin_version = '1.1.1';
 $option_interface = 'zp_picturefill';
 zp_register_filter('theme_head', 'picturefilljs');
 
@@ -118,12 +124,12 @@ function picturefilljs() {
  *    )
  * 	)
  *
- * @param string $standard_sd Url to the normal image for desktop screens in single density - Always set at least this!
- * @param string $standard_hd Url to the normal image for desktop screens in high density
- * @param string $medium_sd Url to the medium image for smaller screens (max-width: 767px) in single density
- * @param string $medium_hd Url to the medium image for smaller screens (max-width: 767px) in high density
- * @param string $small_sd Url to the small image for small screens (max-width: 479px) in single density
- * @param string $small_hd Url to the small image for small screens (max-width: 479px) in high density
+ * @param array $standard_sd Array for the normal image for desktop screens in single density - Always set at least this!
+ * @param array $standard_hd Array for the normal image for desktop screens in high density
+ * @param array $medium_sd Array for the medium image for smaller screens (max-width: 767px) in single density
+ * @param array $medium_hd Array for the medium image for smaller screens (max-width: 767px) in high density
+ * @param array $small_sd Array for the small image for small screens (max-width: 479px) in single density
+ * @param array $small_hd Array for the small image for small screens (max-width: 479px) in high density
  * @param string $class optional class attribute
  * @param string $id optional id attribute
  * @param string $alt alt text
@@ -141,39 +147,39 @@ function getResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd
   $html = '<picture' . $imgclass . $imgid . ' data-picture data-alt="' . html_encode($alt) . '">' . "\n";
 
   //IE bug workaround
-  $html .= '<!--[if IE 9]><video style="display: none;"><![endif]-->';
+	$html .= '<!--[if IE 9]><video style="display: none;"><![endif]-->';
+	
+	//standard desktop size
+	if (!is_null($standard_sd) && !is_null($standard_hd)) {
+		$standard_source = html_encode(pathurlencode($standard_sd['url'])) . ', ' . html_encode(pathurlencode($standard_hd['url'])) . ' 2x';
+	} else if (!is_null($standard_sd)) {
+		$standard_source = html_encode(pathurlencode($standard_sd['url']));
+	} else if (!is_null($standard_hd['url'])) {
+		$standard_source = html_encode(pathurlencode($standard_hd['url'])) . ' 2x';
+	}
+	$html .= '<source class="image_standard" srcset="' . $standard_source . '">';
 
-  //standard desktop size
-  if (!is_null($standard_sd) && !is_null($standard_hd)) {
-    $standard_source = html_encode(pathurlencode($standard_sd['url'])) . ', ' . html_encode(pathurlencode($standard_hd['url'])) . ' 2x';
-  } else if (!is_null($standard_sd)) {
-    $standard_source = html_encode(pathurlencode($standard_sd['url']));
-  } else if (!is_null($standard_hd['url'])) {
-    $standard_source = html_encode(pathurlencode($standard_hd['url'])) . ' 2x';
-  }
-  $html .= '<source class="image_standard" srcset="' . $standard_source . '">';
+	//medium "tablet" size
+	if (!is_null($medium_sd) && !is_null($medium_hd)) {
+		$html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_sd['url'])) . ', ' . html_encode(pathurlencode($medium_hd['url'])) . ' 2x" media="(max-width: 767px)">';
+	} else if (!is_null($standard_sd)) {
+		$html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_sd['url'])) . '" media="(max-width: 767px)">';
+	} else if (!is_null($standard_hd)) {
+		$html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_hd['url'])) . ' 2x" media="(max-width: 767px)">';
+	}
 
-  //medium "tablet" size
-  if (!is_null($medium_sd) && !is_null($medium_hd)) {
-    $html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_sd['url'])) . ', ' . html_encode(pathurlencode($medium_hd['url'])) . ' 2x" media="(max-width: 767px)">';
-  } else if (!is_null($standard_sd)) {
-    $html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_sd['url'])) . '" media="(max-width: 767px)">';
-  } else if (!is_null($standard_hd)) {
-    $html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_hd['url'])) . ' 2x" media="(max-width: 767px)">';
-  }
+	//small "mobile" size
+	if (!is_null($small_sd) && !is_null($small_hd)) {
+		$html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_sd['url'])) . ', ' . html_encode(pathurlencode($small_hd['url'])) . ' 2x" media="(max-width: 479px)">';
+	} else if (!is_null($standard_sd)) {
+		$html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_sd['url'])) . '" media="(max-width: 767px)">';
+	} else if (!is_null($standard_hd)) {
+		$html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_hd['url'])) . ' 2x" media="(max-width: 767px)">';
+	}
 
-  //small "mobile" size
-  if (!is_null($small_sd) && !is_null($small_hd)) {
-    $html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_sd['url'])) . ', ' . html_encode(pathurlencode($small_hd['url'])) . ' 2x" media="(max-width: 479px)">';
-  } else if (!is_null($standard_sd)) {
-    $html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_sd['url'])) . '" media="(max-width: 767px)">';
-  } else if (!is_null($standard_hd)) {
-    $html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_hd['url'])) . ' 2x" media="(max-width: 767px)">';
-  }
-
-  //fall backs for old IEs
-  $html .= '<!--[if IE 9]></video><![endif]-->' . "\n";
-  $html .= '<img srcset="' . html_encode(pathurlencode($standard_sd['url'])) . '" width="'.$standard_sd['width'].'" height="'.$standard_sd['height'].'"alt="' . $alt . '">';
+	//fall backs for old IEs
+	$html .= '<!--[if IE 9]></video><![endif]-->' . "\n";
+	$html .= '<img srcset="' . html_encode(pathurlencode($standard_sd['url'])) . '" width="'.$standard_sd['width'].'" height="'.$standard_sd['height'].'"alt="' . $alt . '">';
 
   $html .= '</picture>' . "\n";
   return $html;
@@ -217,12 +223,12 @@ function getHDQuality($thumb = true) {
  *    )
  * 	)
  *
- * @param string $standard_sd Url to the normal image for desktop screens in single density - Always set at least this!
- * @param string $standard_hd Url to the normal image for desktop screens in high density
- * @param string $medium_sd Url to the medium image for smaller screens (max-width: 767px) in single density
- * @param string $medium_hd Url to the medium image for smaller screens (max-width: 767px) in high density
- * @param string $small_sd Url to the small image for small screens (max-width: 479px) in single density
- * @param string $small_hd Url to the small image for small screens (max-width: 479px) in high density
+ * @param array $standard_sd Array for the normal image for desktop screens in single density - Always set at least this!
+ * @param array $standard_hd Array for the normal image for desktop screens in high density
+ * @param array $medium_sd Array for the medium image for smaller screens (max-width: 767px) in single density
+ * @param array $medium_hd Array for the medium image for smaller screens (max-width: 767px) in high density
+ * @param array $small_sd Array for the small image for small screens (max-width: 479px) in single density
+ * @param array $small_hd Array for the small image for small screens (max-width: 479px) in high density
  * @param string $class optional class attribute
  * @param string $id optional id attribute
  * @param string $alt alt text
@@ -367,7 +373,7 @@ function printResponsiveCustomSizedImage($imgobj, $hd = false, $maxspace = false
  */
 function getHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $height = NULL, $cropw = NULL, $croph = NULL, $cropx = NULL, $cropy = NULL, $thumbStandin = false, $effects = NULL) {
   global $_zp_current_image;
-  if (!is_object($imgobj)) {
+  if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
   }
   $img_sd_size = getSizeCustomImage($size, $width, $height, $cropw, $croph, $cropx, $cropy, $imgobj);
@@ -411,7 +417,7 @@ function getHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $heig
  */
 function getHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, $thumb = false, $effects = null) {
   global $_zp_current_image;
-  if (!is_object($imgobj)) {
+  if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
   }
   getMaxSpaceContainer($width, $height, $imgobj);
@@ -459,7 +465,7 @@ function getHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, $t
  */
 function getHDDefaultSizedImage($imgobj, $hd = false) {
   global $_zp_current_image;
-  if (!is_object($imgobj)) {
+  if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
   }
   //standard
@@ -512,9 +518,10 @@ function printHDDefaultSizedImage($imgobj, $hd = false, $alt = NULL, $class = NU
  */
 function getHDImageThumb($imgobj = null, $hd = false) {
   global $_zp_current_image;
-  if (!is_object($imgobj)) {
+  if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
   }
+ 
   //standard
   $cropw = getOption('thumb_crop_width');
   $croph = getOption('thumb_crop_height');
@@ -533,7 +540,6 @@ function getHDImageThumb($imgobj = null, $hd = false) {
     setOption('thumb_crop_height', $croph * 2, false);
     setOption('thumb_size', $thumbsize * 2, false);
     setOption('thumb_quality', getHDQuality(true), false); // more compression for the hires to save file size
-    $img_hd = $imgobj->getThumb();
     $img_hd_size = getSizeDefaultThumb($imgobj);
     $imgs['img_hd'] = array(
         'url' => $imgobj->getThumb(),
@@ -542,7 +548,7 @@ function getHDImageThumb($imgobj = null, $hd = false) {
     );
     // reset for standard images
     $cropw = setOption('thumb_crop_width', $cropw, false);
-    $croph = getOption('thumb_crop_height', $croph, false);
+    $croph = setOption('thumb_crop_height', $croph, false);
     $thumbsize = setOption('thumb_size', $thumbsize, false);
     $thumbquality = setOption('thumb_quality', $thumbquality, false);
   }
@@ -561,5 +567,45 @@ function getHDImageThumb($imgobj = null, $hd = false) {
 function printHDImageThumb($hd = false, $alt = NULL, $class = NULL, $id = NULL, $imgobj = null) {
   $img = getHDImageThumb($imgobj, $hd);
   printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt);
+}
+
+/**
+ * Standard album thumb as set on the options
+ * If the album is protected for the viewer and the lock image option is set it prints this lock image
+ * plainly without any sizes or HiDPI support
+ *
+ * @param bool $hd Set to true if the HiDPI counterpart should be generated
+ * @param string $alt Alt text
+ * @param string $class optional class tag
+ * @param string $id optional id tag
+ * @param string $albobj Album object optionally
+ */
+function printHDAlbumThumbImage($hd = false, $alt = NULL, $class = NULL, $id = NULL, $albobj = null) {
+	global $_zp_current_album, $_zp_themeroot;
+	if(is_null($albobj)) {
+		$imgobj = $_zp_current_album->getAlbumThumbImage();
+	} else {
+		$imgobj = $albobj->getAlbumThumbImage();
+	}
+	if (!$_zp_current_album->getShow()) {
+		$class .= " not_visible";
+	}
+	$pwd = $_zp_current_album->getPassword();
+	if (!empty($pwd)) {
+		$class .= " password_protected";
+	}
+	$class = trim($class);
+	if ($class) {
+		$class = ' class="' . $class . '"';
+	}
+	if ($id) {
+		$id = ' id="' . $id . '"';
+	}
+  if (!getOption('use_lock_image') || $_zp_current_album->isMyItem(LIST_RIGHTS) || empty($pwd)) {
+  	$img = getHDImageThumb($imgobj, $hd);
+		printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt);
+	} else {
+		echo getPasswordProtectImage(NULL);
+	}
 }
 ?>
