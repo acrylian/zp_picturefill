@@ -34,15 +34,14 @@
  * The HiDPI image creation is optionally.
  * 
  * Usage:
- * Template functions for normal and high density default images - only standard sizes
+ * Template functions for normal and high density default images only
  * - get/printHDDefaultSizedImage() 
  * - get/printHDImageThumb()
  * - printHDAlbumThumbImage()
  * 
- * Template functions for custom sized 
+ * Template functions for custom sized image with normal and high density image and additional versions for responsive breakpoints
  * - get/printResponsiveCustomSizedImage()
-
- * Use these to pass specific sizes to the above manually
+ * Use these to pass specific sizes to the above manually:
  * - getHDCustomSizedImage()
  * - getHDCustomSizedImageMaxSpace()
  *
@@ -64,7 +63,7 @@
 $plugin_is_filter = 9 | THEME_PLUGIN;
 $plugin_description = gettext('A plugin to provide higher resolution gallery images to hires screens.');
 $plugin_author = 'Malte Müller (acrylian)';
-$plugin_version = '1.1.1';
+$plugin_version = '1.1.2';
 $option_interface = 'zp_picturefill';
 zp_register_filter('theme_head', 'picturefilljs');
 
@@ -299,6 +298,8 @@ function getResponsiveCustomSizedImage($imgobj = NULL, $imgsettings, $hd = false
 
 /**
  * Print custom sized images with repsonsive breakpoints for standard, medium and small images and optionally with HiDPI counterparts
+ * This function also supports password checks and displaying the lock image if being used for albums thumbs.
+ *
  * Note: Does not work with  non image files like video or audio. Exclude them on your the theme!
  *
  * Notes on cropping:
@@ -334,17 +335,37 @@ function getResponsiveCustomSizedImage($imgobj = NULL, $imgsettings, $hd = false
  * @param string $id Optional style id
  * @param bool $thumbStandin set to true to treat as thumbnail
  * @param bool $effects image effects (e.g. set gray to force grayscale)
+ * @param bool $albumobj If an album object is passed this is treated as the album thumb and enables 
+ *												password checks and prints the lock image instead of the real thumb if needed (neither responsive nor HiDPI)
  * @return array
  */
-function printResponsiveCustomSizedImage($imgobj, $hd = false, $maxspace = false, $alt, $imgsettings, $class = NULL, $id = NULL, $thumbStandin = false, $effects = NULL) {
-  $images = getResponsiveCustomSizedImage($imgobj, $imgsettings, $hd, $maxspace, $thumbStandin, $effects);
-  $standard_sd = $images['standard']['img_sd'];
-  $standard_hd = $images['standard']['img_hd'];
-  $medium_sd = $images['medium']['img_sd'];
-  $medium_hd = $images['medium']['img_hd'];
-  $small_sd = $images['small']['img_sd'];
-  $small_hd = $images['small']['img_hd'];
-  printResponsiveImage($standard_sd, $standard_hd, $medium_sd, $medium_hd, $small_sd, $small_hd, $class, $id, $alt);
+function printResponsiveCustomSizedImage($imgobj, $hd = false, $maxspace = false, $alt, $imgsettings, $class = NULL, $id = NULL, $thumbStandin = false, $effects = NULL,$albobj = NULL) {
+	if(is_object($albobj) && getClass($albumobj) == 'Album') {
+		$is_albumthumb = true;
+	} else {
+		$is_albumthumb = false;
+	}
+	if($is_albumthumb) {
+		if (!$albobj->getShow()) {
+			$class .= " not_visible";
+		}
+		$pwd = $albobj->getPassword();
+		if (!empty($pwd)) {
+			$class .= " password_protected";
+		}
+	}
+	if ($is_albumthumb && (!getOption('use_lock_image') || $albobj->isMyItem(LIST_RIGHTS) || empty($pwd))) {
+  	$images = getResponsiveCustomSizedImage($imgobj, $imgsettings, $hd, $maxspace, $thumbStandin, $effects);
+  	$standard_sd = $images['standard']['img_sd'];
+  	$standard_hd = $images['standard']['img_hd'];
+  	$medium_sd = $images['medium']['img_sd'];
+  	$medium_hd = $images['medium']['img_hd'];
+  	$small_sd = $images['small']['img_sd'];
+  	$small_hd = $images['small']['img_hd'];
+  	printResponsiveImage($standard_sd, $standard_hd, $medium_sd, $medium_hd, $small_sd, $small_hd, $class, $id, $alt);
+	} else {
+		echo getPasswordProtectImage(NULL);
+	}
 }
 
 /**
@@ -456,7 +477,7 @@ function getHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, $t
  * ************************************************ */
 
 /**
- * Standard sized image as set on the options
+ * Standard sized image with normal and HiDPI resolution as set on the options
  * Note: Does not work with  non image files like video or audio. Exclude them on your the theme!
  *
  * @param obj $imgobj Image object If NULL the current image is used
@@ -495,7 +516,7 @@ function getHDDefaultSizedImage($imgobj, $hd = false) {
 }
 
 /**
- * Standard sized image as set on the options
+ * Standard sized image with normal and HiDPI resolution as set on the options
  * Note: Does not work with  non image files like video or audio. Exclude them on your the theme!
  *
  * @param obj $imgobj Image object If NULL the current image is used
@@ -510,7 +531,7 @@ function printHDDefaultSizedImage($imgobj, $hd = false, $alt = NULL, $class = NU
 }
 
 /**
- * Standard thumb as set on the options
+ * Standard thumb with normal and HiDPI resolution as set on the options
  *
  * @param obj $imgobj Image object If NULL the current image is used
  * @param bool $hd Set to true if the HiDPI counterpart should be generated
@@ -570,7 +591,7 @@ function printHDImageThumb($hd = false, $alt = NULL, $class = NULL, $id = NULL, 
 }
 
 /**
- * Standard album thumb as set on the options
+ * Standard album thumb with normal and HiDPI resolution as set on the options
  * If the album is protected for the viewer and the lock image option is set it prints this lock image
  * plainly without any sizes or HiDPI support
  *
@@ -581,9 +602,10 @@ function printHDImageThumb($hd = false, $alt = NULL, $class = NULL, $id = NULL, 
  * @param string $albobj Album object optionally
  */
 function printHDAlbumThumbImage($hd = false, $alt = NULL, $class = NULL, $id = NULL, $albobj = null) {
-	global $_zp_current_album, $_zp_themeroot;
+	global $_zp_current_album;
 	if(is_null($albobj)) {
 		$imgobj = $_zp_current_album->getAlbumThumbImage();
+		$albobj = $_zp_current_album;
 	} else {
 		$imgobj = $albobj->getAlbumThumbImage();
 	}
@@ -595,14 +617,51 @@ function printHDAlbumThumbImage($hd = false, $alt = NULL, $class = NULL, $id = N
 		$class .= " password_protected";
 	}
 	$class = trim($class);
-	if ($class) {
-		$class = ' class="' . $class . '"';
-	}
-	if ($id) {
-		$id = ' id="' . $id . '"';
-	}
-  if (!getOption('use_lock_image') || $_zp_current_album->isMyItem(LIST_RIGHTS) || empty($pwd)) {
+  if (!getOption('use_lock_image') || $albobj->isMyItem(LIST_RIGHTS) || empty($pwd)) {
   	$img = getHDImageThumb($imgobj, $hd);
+		printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt);
+	} else {
+		echo getPasswordProtectImage(NULL);
+	}
+}
+
+
+/**
+ * Prints a link to a custom sized thumbnail with normal and HiDPI resolution of the current album
+ *
+ * See getCustomImageURL() for details.
+ *
+ * @param string $alt Alt atribute text
+ * @param int $size size
+ * @param int $width width
+ * @param int $height height
+ * @param int $cropw cropwidth
+ * @param int $croph crop height
+ * @param int $cropx crop part x axis
+ * @param int $cropy crop part y axis
+ * @param string $class css class
+ * @param string $id css id
+ *
+ * @return string
+ */
+function printHDCustomAlbumThumbImage($hd = false, $alt = NULL, $size, $width = NULL, $height = NULL, $cropw = NULL, $croph = NULL, $cropx = NULL, $cropy = null, $class = NULL, $id = NULL, $albobj = NULL) {
+	global $_zp_current_album;
+	if(is_null($albobj)) {
+		$imgobj = $_zp_current_album->getAlbumThumbImage();
+		$albobj = $_zp_current_album;
+	} else {
+		$imgobj = $albobj->getAlbumThumbImage();
+	}
+	if (!$_zp_current_album->getShow()) {
+		$class .= " not_visible";
+	}
+	$pwd = $_zp_current_album->getPassword();
+	if (!empty($pwd)) {
+		$class .= " password_protected";
+	}
+	$class = trim($class);
+  if (!getOption('use_lock_image') || $albobj->isMyItem(LIST_RIGHTS) || empty($pwd)) {
+  	$img = getHDCustomSizedImage($imgobj, $hd, $size, $width, $height, $cropw, $croph, $cropx, $cropy, $thumbStandin, $effects);
 		printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt);
 	} else {
 		echo getPasswordProtectImage(NULL);
