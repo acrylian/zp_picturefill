@@ -51,9 +51,6 @@
  * 
  * Please see the in file comments on the functions itself for usage information below.
  * 
- * IMPORTANT NOTE: 
- * Because of the different HTML structure of the <picture> element these functions DO NOT support Zenphoto's standard image HTML filters.
- *
  * @license GPL v3 
  * @author Malte Müller (acrylian)
  *
@@ -97,7 +94,7 @@ function picturefilljs() {
   <?php
 }
 
-/* * *************************
+/* **************************
  * Picturefill functions 
  * ************************** */
 
@@ -132,8 +129,16 @@ function picturefilljs() {
  * @param string $class optional class attribute
  * @param string $id optional id attribute
  * @param string $alt alt text
+ * @param string $imagetype Type of the image for the html filter support
+ *									'custom_image' for custom sized images (default)
+ *									'custom_image_thumb' for custom sized images treated as thumbs
+ *									'custom_album_thumb' for custom sized images
+ *									'standard_image' for default sized images
+ *									'standard_image_thumb' for default sized thumbs
+ *									'standard_album_thumb' for default sized album thumbs
+ *									'none' for static images not part of the gallery
  */
-function getResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd = NULL, $medium_hd = NULL, $small_sd = NULL, $small_hd = NULL, $class = NULL, $id = NULL, $alt = NULL) {
+function getResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd = NULL, $medium_hd = NULL, $small_sd = NULL, $small_hd = NULL, $class = NULL, $id = NULL, $alt = NULL, $imagetype = 'custom_image') {
   $imgclass = '';
   $imgid = '';
   if (!is_null($class)) {
@@ -181,6 +186,27 @@ function getResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd
 	$html .= '<img srcset="' . html_encode(pathurlencode($standard_sd['url'])) . '" width="'.$standard_sd['width'].'" height="'.$standard_sd['height'].'"alt="' . $alt . '">';
 
   $html .= '</picture>' . "\n";
+  switch($imagetype) {
+  	default:
+  	case 'custom_image':
+  		$html = zp_apply_filter('custom_image_html', $html, false);
+  		break;
+  	case 'custom_image_thumb':
+  		$html = zp_apply_filter('custom_image_html', $html, true);
+  		break;
+  	case 'custom_album_thumb':
+  		$html = zp_apply_filter('custom_album_thumb_html', $html);
+  		break;
+  	case 'standard_image': 
+  		$html = zp_apply_filter('standard_image_html', $html);
+  		break;
+  	case 'standard_image_thumb':
+  		$html = zp_apply_filter('standard_image_thumb_html', $html);
+  		break;
+  	case 'standard_album_thumb':
+  		$html = zp_apply_filter('standard_album_thumb_html', $html);
+  		break;
+  }
   return $html;
 }
 
@@ -230,10 +256,17 @@ function getHDQuality($thumb = true) {
  * @param array $small_hd Array for the small image for small screens (max-width: 479px) in high density
  * @param string $class optional class attribute
  * @param string $id optional id attribute
- * @param string $alt alt text
+ * @param string $imagetype Type of the image for the html filter support
+ *									'custom_image' for custom sized images (default)
+ *									'custom_image_thumb' for custom sized images treated as thumbs
+ *									'custom_album_thumb' for custom sized images
+ *									'standard_image' for default sized images
+ *									'standard_image_thumb' for default sized thumbs
+ *									'standard_album_thumb' for default sized album thumbs
+ *									'none' for static images not part of the gallery
  */
-function printResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd = NULL, $medium_hd = NULL, $small_sd = NULL, $small_hd = NULL, $class = NULL, $id = NULL, $alt = NULL) {
-  echo getResponsiveImage($standard_sd, $standard_hd, $medium_sd, $medium_hd, $small_sd, $small_hd, $class, $id, $alt);
+function printResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd = NULL, $medium_hd = NULL, $small_sd = NULL, $small_hd = NULL, $class = NULL, $id = NULL, $alt = NULL, $imagetype = 'custom_image') {
+  echo getResponsiveImage($standard_sd, $standard_hd, $medium_sd, $medium_hd, $small_sd, $small_hd, $class, $id, $alt, $imagetype);
 }
 
 /**
@@ -342,8 +375,15 @@ function getResponsiveCustomSizedImage($imgobj = NULL, $imgsettings, $hd = false
 function printResponsiveCustomSizedImage($imgobj, $hd = false, $maxspace = false, $alt, $imgsettings, $class = NULL, $id = NULL, $thumbStandin = false, $effects = NULL,$albobj = NULL) {
 	if(is_object($albobj) && getClass($albumobj) == 'Album') {
 		$is_albumthumb = true;
+			$imagetype = 'custom_album_thumb';
+		}
 	} else {
 		$is_albumthumb = false;
+		if($thumbStandin) {
+			$imagetype = 'custom_image_thumb';
+		} else {
+			$imagetype = 'custom_image';
+		}
 	}
 	if($is_albumthumb) {
 		if (!$albobj->getShow()) {
@@ -362,7 +402,7 @@ function printResponsiveCustomSizedImage($imgobj, $hd = false, $maxspace = false
   	$medium_hd = $images['medium']['img_hd'];
   	$small_sd = $images['small']['img_sd'];
   	$small_hd = $images['small']['img_hd'];
-  	printResponsiveImage($standard_sd, $standard_hd, $medium_sd, $medium_hd, $small_sd, $small_hd, $class, $id, $alt);
+  	printResponsiveImage($standard_sd, $standard_hd, $medium_sd, $medium_hd, $small_sd, $small_hd, $class, $id, $alt,$imagetype);
 	} else {
 		echo getPasswordProtectImage(NULL);
 	}
@@ -527,7 +567,7 @@ function getHDDefaultSizedImage($imgobj, $hd = false) {
  */
 function printHDDefaultSizedImage($imgobj, $hd = false, $alt = NULL, $class = NULL, $id = NULL) {
   $img = getHDDefaultSizedImage($imgobj, $hd);
-  printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt);
+  printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'standard_image');
 }
 
 /**
@@ -587,7 +627,7 @@ function getHDImageThumb($imgobj = null, $hd = false) {
  */
 function printHDImageThumb($hd = false, $alt = NULL, $class = NULL, $id = NULL, $imgobj = null) {
   $img = getHDImageThumb($imgobj, $hd);
-  printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt);
+  printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'standard_image_thumb');
 }
 
 /**
@@ -619,7 +659,7 @@ function printHDAlbumThumbImage($hd = false, $alt = NULL, $class = NULL, $id = N
 	$class = trim($class);
   if (!getOption('use_lock_image') || $albobj->isMyItem(LIST_RIGHTS) || empty($pwd)) {
   	$img = getHDImageThumb($imgobj, $hd);
-		printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt);
+		printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'standard_album_thumb');
 	} else {
 		echo getPasswordProtectImage(NULL);
 	}
@@ -662,7 +702,7 @@ function printHDCustomAlbumThumbImage($hd = false, $alt = NULL, $size, $width = 
 	$class = trim($class);
   if (!getOption('use_lock_image') || $albobj->isMyItem(LIST_RIGHTS) || empty($pwd)) {
   	$img = getHDCustomSizedImage($imgobj, $hd, $size, $width, $height, $cropw, $croph, $cropx, $cropy, $thumbStandin, $effects);
-		printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt);
+		printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'custom_album_thumb');
 	} else {
 		echo getPasswordProtectImage(NULL);
 	}
