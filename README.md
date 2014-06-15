@@ -4,9 +4,8 @@ zp_picturefill
 A plugin to responsively provide different image resolutions for different screen sizes as well as standard 
 and HiDPI ("Retina") counter parts
  
-An adaption of Picturefill by Scott Jehl - https://github.com/scottjehl/picturefill
-
-**Note: This is now the new version 2.0**
+An adaption of Picturefill 2.0 by Scott Jehl - https://github.com/scottjehl/picturefill
+(Version 1.0 or older uses picturefill 1.x)
  
 Responsive breakpoints
 -----------------------
