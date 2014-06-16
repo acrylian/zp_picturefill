@@ -43,4 +43,26 @@ Modify your theme to use the functions provided
   
 Usage
 ----- 
-Please see the in file comments on the functions itself for more detailed usage information.
+
+Template functions for normal and high density default images only
+
+- `get/printHDDefaultSizedImage()` 
+- `get/printHDImageThumb()`
+- `printHDAlbumThumbImage()`
+  
+Template functions for custom sized image with normal and high density image and additional versions for responsive breakpoints
+
+- `get/printResponsiveCustomSizedImage()`
+
+Use these to pass specific sizes to the above manually:
+
+- `getHDCustomSizedImage()`
+- `getHDCustomSizedImageMaxSpace()`
+ 
+These are the base function to create/print the `<picture>` setup for the responsive image itself. You can use these with static non gallery images on your theme as well, given you have ready made images-
+- `get/printResponsiveImage()`
+  
+Please see the in file comments on the functions itself for usage information below.
+  
+License: GPL v3 
+
