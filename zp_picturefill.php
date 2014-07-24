@@ -2,6 +2,7 @@
 /**
  * A plugin to responsively provide different image resolutions for different screen sizes as well as standard 
  * and HiDPI ("Retina") counter parts
+ *
  * An adaption of Picturefill 2.x by Scott Jehl - https://github.com/scottjehl/picturefill
  * Read more about it on http://scottjehl.github.io/picturefill/
  *
@@ -51,16 +52,16 @@
  * 
  * Please see the in file comments on the functions itself for usage information below.
  * 
- * @license GPL v3 
- * @author Malte Müller (acrylian)
- *
+ * @author Malte Müller (acrylian) <info@maltem.de>
+ * @copyright 2014 Malte Müller
+ * @license GPL v3 or later
  * @package plugins
  * @subpackage media
  */
 $plugin_is_filter = 9 | THEME_PLUGIN;
 $plugin_description = gettext('A plugin to provide higher resolution gallery images to hires screens.');
 $plugin_author = 'Malte Müller (acrylian)';
-$plugin_version = '1.1.1';
+$plugin_version = '1.1.2';
 $option_interface = 'zp_picturefill';
 zp_register_filter('theme_head', 'picturefilljs');
 
