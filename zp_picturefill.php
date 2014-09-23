@@ -61,7 +61,7 @@
 $plugin_is_filter = 9 | THEME_PLUGIN;
 $plugin_description = gettext('A plugin to provide higher resolution gallery images to hires screens.');
 $plugin_author = 'Malte Müller (acrylian)';
-$plugin_version = '1.1.2';
+$plugin_version = '1.1.3';
 $option_interface = 'zp_picturefill';
 zp_register_filter('theme_head', 'picturefilljs');
 
@@ -177,9 +177,9 @@ function getResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd
 	if (!is_null($small_sd) && !is_null($small_hd)) {
 		$html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_sd['url'])) . ', ' . html_encode(pathurlencode($small_hd['url'])) . ' 2x" media="(max-width: 479px)">';
 	} else if (!is_null($standard_sd)) {
-		$html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_sd['url'])) . '" media="(max-width: 767px)">';
+		$html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_sd['url'])) . '" media="(max-width: 479px)">';
 	} else if (!is_null($standard_hd)) {
-		$html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_hd['url'])) . ' 2x" media="(max-width: 767px)">';
+		$html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_hd['url'])) . ' 2x" media="(max-width: 479px)">';
 	}
 
 	//fall backs for old IEs
