@@ -102,24 +102,13 @@ function picturefilljs() {
 /**
  * Returns the Picturefill html setup for standard, medium and small images, both with optional standard and high density. 
  * It can be used for non gallery static images on the theme pages, too.
- * Note each standard/medium/small parameter requires an multidimensional array as returnd by the plugin's getXXX functions:
- * array(
- *  'img_sd' => 
+ * Note each standard/medium/small sd/hd parameter requires an multidimensional array as returnd by the plugin's getXXX functions:
+ *
  *    array(
  *      'url' => '<full url of the image', 
  *      'width' => '<width in px>', 
  *      'height' => '<height in px>'
  *    )
- * 	)
- * respectively for the HiDPI image:
- * array(
- *  'img_hd' => 
- *    array(
- *      'url' => '<full url of the image', 
- *      'width' => '<width in px>', 
- *      'height' => '<height in px>'
- *    )
- * 	)
  *
  * @param array $standard_sd Array for the normal image for desktop screens in single density - Always set at least this!
  * @param array $standard_hd Array for the normal image for desktop screens in high density
@@ -230,24 +219,13 @@ function getHDQuality($thumb = true) {
 /**
  * Prints the Picturefill html setup for standard, medium and small images, both with optional standard and high density. 
  * It can be used for non gallery static images on the theme pages, too.
- * Note each standard/medium/small parameter requires an multidimensional array as returnd by the plugin's getXXX functions:
- * array(
- *  'img_sd' => 
+ * Note each standard/medium/small sd/hd parameter requires an multidimensional array as returnd by the plugin's getXXX functions:
+ *
  *    array(
  *      'url' => '<full url of the image', 
  *      'width' => '<width in px>', 
  *      'height' => '<height in px>'
  *    )
- * 	)
- * respectively for the HiDPI image:
- * array(
- *  'img_hd' => 
- *    array(
- *      'url' => '<full url of the image', 
- *      'width' => '<width in px>', 
- *      'height' => '<height in px>'
- *    )
- * 	)
  *
  * @param array $standard_sd Array for the normal image for desktop screens in single density - Always set at least this!
  * @param array $standard_hd Array for the normal image for desktop screens in high density
