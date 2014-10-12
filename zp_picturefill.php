@@ -151,24 +151,24 @@ function getResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd
 	} else if (!is_null($standard_hd['url'])) {
 		$standard_source = html_encode(pathurlencode($standard_hd['url'])) . ' 2x';
 	}
-	$html .= '<source class="image_standard" srcset="' . $standard_source . '">';
+	$html .= '<source srcset="' . $standard_source . '">';
 
 	//medium "tablet" size
 	if (!is_null($medium_sd) && !is_null($medium_hd)) {
-		$html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_sd['url'])) . ', ' . html_encode(pathurlencode($medium_hd['url'])) . ' 2x" media="(max-width: 767px)">';
+		$html .= '<source srcset="' . html_encode(pathurlencode($medium_sd['url'])) . ', ' . html_encode(pathurlencode($medium_hd['url'])) . ' 2x" media="(max-width: 767px)">';
 	} else if (!is_null($standard_sd)) {
-		$html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_sd['url'])) . '" media="(max-width: 767px)">';
+		$html .= '<source srcset="' . html_encode(pathurlencode($medium_sd['url'])) . '" media="(max-width: 767px)">';
 	} else if (!is_null($standard_hd)) {
-		$html .= '<source class="image_medium" srcset="' . html_encode(pathurlencode($medium_hd['url'])) . ' 2x" media="(max-width: 767px)">';
+		$html .= '<source srcset="' . html_encode(pathurlencode($medium_hd['url'])) . ' 2x" media="(max-width: 767px)">';
 	}
 
 	//small "mobile" size
 	if (!is_null($small_sd) && !is_null($small_hd)) {
-		$html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_sd['url'])) . ', ' . html_encode(pathurlencode($small_hd['url'])) . ' 2x" media="(max-width: 479px)">';
+		$html .= '<source srcset="' . html_encode(pathurlencode($small_sd['url'])) . ', ' . html_encode(pathurlencode($small_hd['url'])) . ' 2x" media="(max-width: 479px)">';
 	} else if (!is_null($standard_sd)) {
-		$html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_sd['url'])) . '" media="(max-width: 479px)">';
+		$html .= '<source srcset="' . html_encode(pathurlencode($small_sd['url'])) . '" media="(max-width: 479px)">';
 	} else if (!is_null($standard_hd)) {
-		$html .= '<source class="image_small" srcset="' . html_encode(pathurlencode($small_hd['url'])) . ' 2x" media="(max-width: 479px)">';
+		$html .= '<source srcset="' . html_encode(pathurlencode($small_hd['url'])) . ' 2x" media="(max-width: 479px)">';
 	}
 
 	//fall backs for old IEs
