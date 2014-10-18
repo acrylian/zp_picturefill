@@ -3,21 +3,11 @@
  * A plugin to responsively provide different image resolutions for different screen sizes as well as standard 
  * and HiDPI ("Retina") counter parts
  *
- * An adaption of Picturefill 2.x by Scott Jehl - https://github.com/scottjehl/picturefill
+ * An adaption of the polyfill Picturefill 2.x by Scott Jehl - https://github.com/scottjehl/picturefill
  * Read more about it on http://scottjehl.github.io/picturefill/
+ *  
+ * Note that this plugin does only solve some basic usage scenarios of both img srcset and picture. 
  *
- * Responsive breakpoints:
- * These three are setup by default:
- * Standard: For normal desktop usage (aka "large") - Always set at least this!
- * Medium: For smaller "tablet" screens max-width 767px
- * Small: For small "mobile" screens with max-width 479px
- * 
- * I decided to only use these general ones so the function stays usable regarding parameters. 
- * Also they match my own small responsive CSS framework Zenponsive. 
- * Also the Picturefill author recommends not to use too many breakpoints because the DOM 
- * otherwise gets easily too large and slow. 
- * You should be able to adapt custom function with more or other sizes if you need them.
- * 
  * HiDPI images ("Retina")
  * The new HD screens provide a higher pixel density than normal screens ("Retina" as Apple calls them).
  * and soon they will be most likely more widely used, especially on mobile devives.
@@ -32,15 +22,20 @@
  * That way their file size is not that much bigger than standard images. The hires images are always compressed at 35% by default
  * while the standard images use what ever you have set on the Zenphoto image quality options. You can set options to adjust
  *
- * The HiDPI image creation is optionally.
+ * The HiDPI image creation is optionally although it does not really make sense to leave it out for most functions
  * 
  * Usage:
- * Template functions for normal and high density default images only
+ * a) Simple standard and high density images using <img src="img_sd.jpg" srcset="img_sd.jpg 1x, img_hd.jpg 2x">
+ * Template functions for simple normal and high density default images using for detailed usage information 
  * - get/printHDDefaultSizedImage() 
  * - get/printHDImageThumb()
  * - printHDAlbumThumbImage()
- * 
- * Template functions for custom sized image with normal and high density image and additional versions for responsive breakpoints
+ *
+ * There are standard functions to use these with on gallery images as well:
+ * - get/printHDSrcsetImage()
+ *
+ * b) "Art direction" responsive images using <picture>
+ * These template functions are for custom sized images with normal and high density image and additional versions for responsive breakpoints
  * - get/printResponsiveCustomSizedImage()
  * Use these to pass specific sizes to the above manually:
  * - getHDCustomSizedImage()
@@ -49,8 +44,19 @@
  * These are the base function to create/print the <picture> setup for the responsive image itself.
  * You can use these with static non gallery images on your theme as well, given you have ready made images-
  * - get/printResponsiveImage()
+ *
+ * Responsive breakpoints:
+ * These three are setup by default:
+ * Standard: For desktop usage (aka "large") - Always set at least this!
+ * Medium: For smaller "tablet" screens max-width 767px
+ * Small: For small "mobile" screens with max-width 479px
  * 
- * Please see the in file comments on the functions itself for usage information below.
+ * I decided to only use these general ones so the function stays usable regarding parameters. 
+ * Also they match my own small responsive CSS grid Zenponsive. 
+ * Also the Picturefill author recommends not to use too many breakpoints because the DOM 
+ * otherwise gets easily too large and slow. You should be able to adapt custom function with more or other sizes if you need them.
+ * 
+ * Please see the in file comments on each function itself for detailed usage information below.
  * 
  * @author Malte Müller (acrylian) <info@maltem.de>
  * @copyright 2014 Malte Müller
@@ -61,7 +67,7 @@
 $plugin_is_filter = 9 | THEME_PLUGIN;
 $plugin_description = gettext('A plugin to provide higher resolution gallery images to hires screens.');
 $plugin_author = 'Malte Müller (acrylian)';
-$plugin_version = '1.2.1';
+$plugin_version = '1.3';
 $option_interface = 'zp_picturefill';
 zp_register_filter('theme_head', 'picturefilljs');
 
@@ -100,7 +106,7 @@ function picturefilljs() {
  * ************************** */
 
 /**
- * Returns the Picturefill html setup for standard, medium and small images, both with optional standard and high density. 
+ * Returns the <picture> html setup for standard, medium and small images, both with optional standard and high density. 
  * It can be used for non gallery static images on the theme pages, too.
  * Note each standard/medium/small sd/hd parameter requires an multidimensional array as returnd by the plugin's getXXX functions:
  *
@@ -173,51 +179,15 @@ function getResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd
 
 	//fall backs for old IEs
 	$html .= '<!--[if IE 9]></video><![endif]-->' . "\n";
-	$html .= '<img srcset="' . html_encode(pathurlencode($standard_sd['url'])) . '" width="'.$standard_sd['width'].'" height="'.$standard_sd['height'].'"alt="' . $alt . '">';
+	$html .= '<img srcset="' . html_encode(pathurlencode($standard_sd['url'])) . '" width="'.$standard_sd['width'].'" height="'.$standard_sd['height'].'" alt="' . $alt . '">';
 
   $html .= '</picture>' . "\n";
-  switch($imagetype) {
-  	default:
-  	case 'custom_image':
-  		$html = zp_apply_filter('custom_image_html', $html, false);
-  		break;
-  	case 'custom_image_thumb':
-  		$html = zp_apply_filter('custom_image_html', $html, true);
-  		break;
-  	case 'custom_album_thumb':
-  		$html = zp_apply_filter('custom_album_thumb_html', $html);
-  		break;
-  	case 'standard_image': 
-  		$html = zp_apply_filter('standard_image_html', $html);
-  		break;
-  	case 'standard_image_thumb':
-  		$html = zp_apply_filter('standard_image_thumb_html', $html);
-  		break;
-  	case 'standard_album_thumb':
-  		$html = zp_apply_filter('standard_album_thumb_html', $html);
-  		break;
-  }
+  $html = applyImageFilter($html, $imagetype);
   return $html;
 }
 
 /**
- * Helper function to get the quality option setting for the HD images
- * @param bool $thumb true for thumb quality, false for sized image quality
- */
-function getHDQuality($thumb = true) {
-  if ($thumb) {
-    $quality = getOption('zp_picturefill_thumbquality');
-  } else {
-    $quality = getOption('zp_picturefill_imagequality');
-  }
-  if (empty($quality)) {
-    $quality = 35;
-  }
-  return $quality;
-}
-
-/**
- * Prints the Picturefill html setup for standard, medium and small images, both with optional standard and high density. 
+ * Prints the <picture> html setup for standard, medium and small images, both with optional standard and high density. 
  * It can be used for non gallery static images on the theme pages, too.
  * Note each standard/medium/small sd/hd parameter requires an multidimensional array as returnd by the plugin's getXXX functions:
  *
@@ -249,7 +219,7 @@ function printResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_
 }
 
 /**
- * Gets custom sized image with repsonsive breakpoints for standard, medium and small images and optionally with HiDPI counterparts
+ * Gets custom sized images with repsonsive breakpoints for standard, medium and small images and optionally with HiDPI counterparts
  * Note: Does not work with  non image files like video or audio. Exclude them on your the theme!
  *
  * You need to pass the image sizes for the standard, medium and small images via the nested array $imgsettings. 
@@ -354,8 +324,7 @@ function getResponsiveCustomSizedImage($imgobj = NULL, $imgsettings, $hd = false
 function printResponsiveCustomSizedImage($imgobj, $hd = false, $maxspace = false, $alt, $imgsettings, $class = NULL, $id = NULL, $thumbStandin = false, $effects = NULL,$albobj = NULL) {
 	if(is_object($albobj) && getClass($albumobj) == 'Album') {
 		$is_albumthumb = true;
-			$imagetype = 'custom_album_thumb';
-		}
+		$imagetype = 'custom_album_thumb';
 	} else {
 		$is_albumthumb = false;
 		if($thumbStandin) {
@@ -385,6 +354,109 @@ function printResponsiveCustomSizedImage($imgobj, $hd = false, $maxspace = false
 	} else {
 		echo getPasswordProtectImage(NULL);
 	}
+}
+
+/**
+ * Returns the <img src="img_sd.jpg" srcset="img_sd.jpg 1x, img_hd.jpg 2x"> html setup for standard and high density image.
+ * It can be used for non gallery static images on the theme pages, too.
+ * Note each sd and hd parameter requires an multidimensional array as returnd by the plugin's getHDXXX functions:
+ *
+ *    array(
+ *      'url' => '<full url of the image', 
+ *      'width' => '<width in px>', 
+ *      'height' => '<height in px>'
+ *    )
+ * Naturally it does not makes sense to pass only one img parameter.
+ *
+ * @param array $standard_sd Array for the normal image for desktop screens in single density - Always set at least this!
+ * @param array $standard_hd Array for the normal image for desktop screens in high density
+ * @param string $class optional class attribute
+ * @param string $id optional id attribute
+ * @param string $imagetype Type of the image for the html filter support
+ *									'custom_image' for custom sized images (default)
+ *									'custom_image_thumb' for custom sized images treated as thumbs
+ *									'custom_album_thumb' for custom sized images
+ *									'standard_image' for default sized images
+ *									'standard_image_thumb' for default sized thumbs
+ *									'standard_album_thumb' for default sized album thumbs
+ *									'none' for static images not part of the gallery
+ */
+function getHDSrcsetImage($standard_sd = NULL, $standard_hd = NULL, $class, $id, $alt, $imagetype) {
+	$imgclass = '';
+  $imgid = '';
+  if (!is_null($class)) {
+    $imgclass = ' class="' . $class . '"';
+  }
+  if (!is_null($id)) {
+    $imgid = ' id="' . $id . '"';
+  }
+	$sd = html_encode(pathurlencode($standard_sd['url']));
+	$hd = html_encode(pathurlencode($standard_hd['url']));
+	$sd_srcset = $sd.' 1x';
+	if(!empty($hd)) {
+		$hd_srcset = ','.$hd.' 2x';
+	}
+	$html = '<img src="'.$sd.'" srcset="'.$sd_srcset.$hd_srcset.'" alt="'. html_encode($alt).'"'.$imgclass.$imgid.' width="'.$standard_sd['width'].'" height="'.$standard_sd['height'].'">';
+	$html = applyImageFilter($html, $imagetype);
+	return $html;
+}
+
+/**
+ * Prints the <img src="img_sd.jpg" srcset="img_sd.jpg 1x, img_hd.jpg 2x"> html setup for standard and high density image.
+ * It can be used for non gallery static images on the theme pages, too. 
+ * Note each sd and hd parameter requires an multidimensional array as returnd by the plugin's getHDXXX functions:
+ *
+ *    array(
+ *      'url' => '<full url of the image', 
+ *      'width' => '<width in px>', 
+ *      'height' => '<height in px>'
+ *    )
+ * Naturally it does not makes sense to pass only one img parameter.
+ *
+ * @param array $standard_sd Array for the normal image for desktop screens in single density - Always set at least this!
+ * @param array $standard_hd Array for the normal image for desktop screens in high density
+ * @param string $class optional class attribute
+ * @param string $id optional id attribute
+ * @param string $imagetype Type of the image for the html filter support
+ *									'custom_image' for custom sized images (default)
+ *									'custom_image_thumb' for custom sized images treated as thumbs
+ *									'custom_album_thumb' for custom sized images
+ *									'standard_image' for default sized images
+ *									'standard_image_thumb' for default sized thumbs
+ *									'standard_album_thumb' for default sized album thumbs
+ *									'none' for static images not part of the gallery
+ */
+function printHDSrcsetImage($standard_sd = NULL, $standard_hd = NULL, $class, $id, $alt, $imagetype) {
+	echo getHDSrcsetImage($standard_sd, $standard_hd, $class, $id, $alt, $imagetype);
+}
+
+/**
+ * Print custom sized image optionally with HiDPI counterpart
+ * Note: Does not work with  non image files like video or audio. Exclude them on your the theme!
+ *
+ * Notes on cropping:
+ *
+ * The $crop* parameters determine the portion of the original image that will be incorporated
+ * into the final image. The w and h "sizes" are typically proportional. That is you can set them to
+ * values that reflect the ratio of width to height that you want for the final image. Typically
+ * you would set them to the fincal height and width.
+ *
+ * @param obj $imgobj Image object If NULL the current image is used
+ * @param bool $hd Set to true if the HiDPI counterpart should be generated
+ * @param int $size size
+ * @param int $width width
+ * @param int $height height
+ * @param int $cropw crop width
+ * @param int $croph crop height
+ * @param int $cropx crop x axis
+ * @param int $cropy crop y axis
+ * @param bool $thumbStandin set to true to treat as thumbnail
+ * @param bool $effects image effects (e.g. set gray to force grayscale)
+ * @return array
+ */
+function printHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $height = NULL, $cropw = NULL, $croph = NULL, $cropx = NULL, $cropy = NULL, $thumbStandin = false, $effects = NULL) {
+	$img = getHDCustomSizedImage($imgobj, $hd, $size, $width, $height, $cropw, $croph, $cropx, $cropy, $thumbStandin, $effects);
+  printHDSrcsetImage($img['img_sd'], $img['img_hd'] = NULL, $class, $id, $alt, 'custom_image');
 }
 
 /**
@@ -442,6 +514,26 @@ function getHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $heig
     setOption('image_quality', $imagequality, false); // reset for standard images
   }
   return array($img_sd, $img_hd);
+}
+
+/**
+ * Prints images which will fit un-cropped within the width & height parameters given optionally with HiDPI counterpart
+ * Note: Does not work with  non image files like video or audio. Exclude them on your theme!
+ *
+ * @param obj $imgobj Image object If NULL the current image is used
+ * @param bool $hd Set to true if the HiDPI counterpart should be generated
+ * @param int $width width
+ * @param int $height height
+ * @param bool $thumb set to true to treat as thumbnail
+ * @param bool $effects image effects (e.g. set gray to force grayscale)
+ */
+function printHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, $thumb = false, $effects = null) {
+	$img = getHDCustomSizedImageMaxSpace($imgobj, $hd, $width, $height, $thumb, $effects);
+	$imagetype = 'standard_image';
+	if($thumb) {
+		$imagetype = 'standard_image_thumb';
+	} 
+	printHDSrcsetImage($img['img_sd'], $img['img_hd'], $class, $id, $alt, $imagetype);
 }
 
 /**
@@ -545,8 +637,13 @@ function getHDDefaultSizedImage($imgobj, $hd = false) {
  * @param string $id Optional style id
  */
 function printHDDefaultSizedImage($imgobj, $hd = false, $alt = NULL, $class = NULL, $id = NULL) {
+	global $_zp_current_image;
+  if (is_null($imgobj)) {
+    $imgobj = $_zp_current_image;
+  }
   $img = getHDDefaultSizedImage($imgobj, $hd);
-  printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'standard_image');
+  printHDSrcsetImage($img['img_sd'], $img['img_hd'], $class, $id, $alt, 'standard_image');
+  //printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'standard_image');
 }
 
 /**
@@ -606,7 +703,8 @@ function getHDImageThumb($imgobj = null, $hd = false) {
  */
 function printHDImageThumb($hd = false, $alt = NULL, $class = NULL, $id = NULL, $imgobj = null) {
   $img = getHDImageThumb($imgobj, $hd);
-  printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'standard_image_thumb');
+  printHDSrcsetImage($img['img_sd'], $img['img_hd'], $class, $id, $alt, 'standard_image_thumb');
+  //printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'standard_image_thumb');
 }
 
 /**
@@ -638,7 +736,8 @@ function printHDAlbumThumbImage($hd = false, $alt = NULL, $class = NULL, $id = N
 	$class = trim($class);
   if (!getOption('use_lock_image') || $albobj->isMyItem(LIST_RIGHTS) || empty($pwd)) {
   	$img = getHDImageThumb($imgobj, $hd);
-		printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'standard_album_thumb');
+  	printHDSrcsetImage($img['img_sd'], $img['img_hd'], $class, $id, $alt, 'standard_album_thumb');
+		//printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'standard_album_thumb');
 	} else {
 		echo getPasswordProtectImage(NULL);
 	}
@@ -681,9 +780,60 @@ function printHDCustomAlbumThumbImage($hd = false, $alt = NULL, $size, $width = 
 	$class = trim($class);
   if (!getOption('use_lock_image') || $albobj->isMyItem(LIST_RIGHTS) || empty($pwd)) {
   	$img = getHDCustomSizedImage($imgobj, $hd, $size, $width, $height, $cropw, $croph, $cropx, $cropy, $thumbStandin, $effects);
-		printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'custom_album_thumb');
+  	printHDSrcsetImage($img['img_sd'], $img['img_hd'], $class, $id, $alt, 'custom_album_thumb');
+		//printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'custom_album_thumb');
 	} else {
 		echo getPasswordProtectImage(NULL);
 	}
+}
+
+/*************************
+* HELER FUNCTIONS
+*************************/
+
+/**
+ * Helper function to get the quality option setting for the HD images - Used internally only
+ * @param bool $thumb true for thumb quality, false for sized image quality
+ */
+function getHDQuality($thumb = true) {
+  if ($thumb) {
+    $quality = getOption('zp_picturefill_thumbquality');
+  } else {
+    $quality = getOption('zp_picturefill_imagequality');
+  }
+  if (empty($quality)) {
+    $quality = 35;
+  }
+  return $quality;
+}
+
+/**
+ * Helper function to apply the image filter - Used internally only
+ * @param string $html as passed within printResponsiveImage() and printSrcsetImage()
+ * @param string $imagetpye image type as passed within printResponsiveImage() and printSrcsetImage()
+ */
+function applyImageFilter($html, $imagetype) {
+	switch($imagetype) {
+  	default:
+  	case 'custom_image':
+  		$html = zp_apply_filter('custom_image_html', $html, false);
+  		break;
+  	case 'custom_image_thumb':
+  		$html = zp_apply_filter('custom_image_html', $html, true);
+  		break;
+  	case 'custom_album_thumb':
+  		$html = zp_apply_filter('custom_album_thumb_html', $html);
+  		break;
+  	case 'standard_image': 
+  		$html = zp_apply_filter('standard_image_html', $html);
+  		break;
+  	case 'standard_image_thumb':
+  		$html = zp_apply_filter('standard_image_thumb_html', $html);
+  		break;
+  	case 'standard_album_thumb':
+  		$html = zp_apply_filter('standard_album_thumb_html', $html);
+  		break;
+  }
+  return $html;
 }
 ?>
