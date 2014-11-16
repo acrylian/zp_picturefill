@@ -354,8 +354,7 @@ function getResponsiveCustomSizedImage($imgobj = NULL, $imgsettings, $hd = false
 function printResponsiveCustomSizedImage($imgobj, $hd = false, $maxspace = false, $alt, $imgsettings, $class = NULL, $id = NULL, $thumbStandin = false, $effects = NULL,$albobj = NULL) {
 	if(is_object($albobj) && getClass($albumobj) == 'Album') {
 		$is_albumthumb = true;
-			$imagetype = 'custom_album_thumb';
-		}
+		$imagetype = 'custom_album_thumb';
 	} else {
 		$is_albumthumb = false;
 		if($thumbStandin) {
