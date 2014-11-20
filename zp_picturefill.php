@@ -245,7 +245,7 @@ function printResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_
  * @param bool $thumbStandin set to true to treat as thumbnail
  * @param bool $effects image effects (e.g. set gray to force grayscale) 
  */
-function getResponsiveCustomSizedImage($imgobj = NULL, $imgsettings, $hd = false, $maxspace = false, $thumbStandin = false, $effects = NULL) {
+function getResponsiveCustomSizedImage($imgobj = NULL, $imgsettings, $hd = true, $maxspace = false, $thumbStandin = false, $effects = NULL) {
   global $_zp_current_image;
   if (!is_object($imgobj)) {
     $imgobj = $_zp_current_image;
@@ -321,7 +321,7 @@ function getResponsiveCustomSizedImage($imgobj = NULL, $imgsettings, $hd = false
  *												password checks and prints the lock image instead of the real thumb if needed (neither responsive nor HiDPI)
  * @return array
  */
-function printResponsiveCustomSizedImage($imgobj, $hd = false, $maxspace = false, $alt, $imgsettings, $class = NULL, $id = NULL, $thumbStandin = false, $effects = NULL,$albobj = NULL) {
+function printResponsiveCustomSizedImage($imgobj, $hd = true, $maxspace = false, $alt, $imgsettings, $class = NULL, $id = NULL, $thumbStandin = false, $effects = NULL,$albobj = NULL) {
 	if(is_object($albobj) && getClass($albumobj) == 'Album') {
 		$is_albumthumb = true;
 		$imagetype = 'custom_album_thumb';
@@ -454,7 +454,7 @@ function printHDSrcsetImage($standard_sd = NULL, $standard_hd = NULL, $class, $i
  * @param bool $effects image effects (e.g. set gray to force grayscale)
  * @return array
  */
-function printHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $height = NULL, $cropw = NULL, $croph = NULL, $cropx = NULL, $cropy = NULL, $thumbStandin = false, $effects = NULL) {
+function printHDCustomSizedImage($imgobj, $hd = true, $size, $width = NULL, $height = NULL, $cropw = NULL, $croph = NULL, $cropx = NULL, $cropy = NULL, $thumbStandin = false, $effects = NULL) {
 	$img = getHDCustomSizedImage($imgobj, $hd, $size, $width, $height, $cropw, $croph, $cropx, $cropy, $thumbStandin, $effects);
   printHDSrcsetImage($img['img_sd'], $img['img_hd'] = NULL, $class, $id, $alt, 'custom_image');
 }
@@ -483,7 +483,7 @@ function printHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $he
  * @param bool $effects image effects (e.g. set gray to force grayscale)
  * @return array
  */
-function getHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $height = NULL, $cropw = NULL, $croph = NULL, $cropx = NULL, $cropy = NULL, $thumbStandin = false, $effects = NULL) {
+function getHDCustomSizedImage($imgobj, $hd = true, $size, $width = NULL, $height = NULL, $cropw = NULL, $croph = NULL, $cropx = NULL, $cropy = NULL, $thumbStandin = false, $effects = NULL) {
   global $_zp_current_image;
   if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
@@ -527,7 +527,7 @@ function getHDCustomSizedImage($imgobj, $hd = false, $size, $width = NULL, $heig
  * @param bool $thumb set to true to treat as thumbnail
  * @param bool $effects image effects (e.g. set gray to force grayscale)
  */
-function printHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, $thumb = false, $effects = null) {
+function printHDCustomSizedImageMaxSpace($imgobj, $hd = true, $width, $height, $thumb = false, $effects = null) {
 	$img = getHDCustomSizedImageMaxSpace($imgobj, $hd, $width, $height, $thumb, $effects);
 	$imagetype = 'standard_image';
 	if($thumb) {
@@ -547,7 +547,7 @@ function printHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, 
  * @param bool $thumb set to true to treat as thumbnail
  * @param bool $effects image effects (e.g. set gray to force grayscale)
  */
-function getHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, $thumb = false, $effects = null) {
+function getHDCustomSizedImageMaxSpace($imgobj, $hd = true, $width, $height, $thumb = false, $effects = null) {
   global $_zp_current_image;
   if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
@@ -595,7 +595,7 @@ function getHDCustomSizedImageMaxSpace($imgobj, $hd = false, $width, $height, $t
  * @param bool $hd Set to true if the HiDPI counterpart should be generated 
  * @return array
  */
-function getHDDefaultSizedImage($imgobj, $hd = false) {
+function getHDDefaultSizedImage($imgobj, $hd = true) {
   global $_zp_current_image;
   if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
@@ -636,7 +636,7 @@ function getHDDefaultSizedImage($imgobj, $hd = false) {
  * @param string $class Optional style class
  * @param string $id Optional style id
  */
-function printHDDefaultSizedImage($imgobj, $hd = false, $alt = NULL, $class = NULL, $id = NULL) {
+function printHDDefaultSizedImage($imgobj, $hd = true, $alt = NULL, $class = NULL, $id = NULL) {
 	global $_zp_current_image;
   if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
@@ -653,7 +653,7 @@ function printHDDefaultSizedImage($imgobj, $hd = false, $alt = NULL, $class = NU
  * @param bool $hd Set to true if the HiDPI counterpart should be generated
  * @return array
  */
-function getHDImageThumb($imgobj = null, $hd = false) {
+function getHDImageThumb($imgobj = null, $hd = true) {
   global $_zp_current_image;
   if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
@@ -701,7 +701,7 @@ function getHDImageThumb($imgobj = null, $hd = false) {
  * @param string $id optional id tag
  * @param string $imgobj Image object 
  */
-function printHDImageThumb($hd = false, $alt = NULL, $class = NULL, $id = NULL, $imgobj = null) {
+function printHDImageThumb($hd = true, $alt = NULL, $class = NULL, $id = NULL, $imgobj = null) {
   $img = getHDImageThumb($imgobj, $hd);
   printHDSrcsetImage($img['img_sd'], $img['img_hd'], $class, $id, $alt, 'standard_image_thumb');
   //printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'standard_image_thumb');
@@ -718,7 +718,7 @@ function printHDImageThumb($hd = false, $alt = NULL, $class = NULL, $id = NULL, 
  * @param string $id optional id tag
  * @param string $albobj Album object optionally
  */
-function printHDAlbumThumbImage($hd = false, $alt = NULL, $class = NULL, $id = NULL, $albobj = null) {
+function printHDAlbumThumbImage($hd = true, $alt = NULL, $class = NULL, $id = NULL, $albobj = null) {
 	global $_zp_current_album;
 	if(is_null($albobj)) {
 		$imgobj = $_zp_current_album->getAlbumThumbImage();
@@ -762,7 +762,7 @@ function printHDAlbumThumbImage($hd = false, $alt = NULL, $class = NULL, $id = N
  *
  * @return string
  */
-function printHDCustomAlbumThumbImage($hd = false, $alt = NULL, $size, $width = NULL, $height = NULL, $cropw = NULL, $croph = NULL, $cropx = NULL, $cropy = null, $class = NULL, $id = NULL, $albobj = NULL) {
+function printHDCustomAlbumThumbImage($hd = true, $alt = NULL, $size, $width = NULL, $height = NULL, $cropw = NULL, $croph = NULL, $cropx = NULL, $cropy = null, $class = NULL, $id = NULL, $albobj = NULL) {
 	global $_zp_current_album;
 	if(is_null($albobj)) {
 		$imgobj = $_zp_current_album->getAlbumThumbImage();
