@@ -30,6 +30,7 @@
  * - get/printHDDefaultSizedImage() 
  * - get/printHDImageThumb()
  * - printHDAlbumThumbImage()
+ * - get/printHDCustomSizedImage()
  *
  * There are standard functions to use these with on gallery images as well:
  * - get/printHDSrcsetImage()
