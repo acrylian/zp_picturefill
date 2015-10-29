@@ -35,8 +35,8 @@ while the standard images use what ever you have set on the Zenphoto image quali
  
 Installation 
 ------------- 
-Place the file and folder within your `/plugins` folder.
-Modify your theme to use the functions provided
+Place the file `zp_picturefill.php` and the folder `zp_picturefill` within your `/plugins` folder.
+Modify your theme to use the functions provided.
   
 Usage
 ----- 
