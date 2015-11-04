@@ -59,6 +59,6 @@ Use these to pass specific sizes to the above manually:
 These are the base function to create/print the `<picture>` setup for the responsive image itself. You can use these with static non gallery images on your theme as well, given you have ready made images-
 - `get/printResponsiveImage()`
   
-Please see the in file comments on the functions itself for usage information below.
+Please see the in file comments on the functions itself for more detail usage information.
   
 License: GPL v3 
