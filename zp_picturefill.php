@@ -68,7 +68,7 @@
 $plugin_is_filter = 9 | THEME_PLUGIN;
 $plugin_description = gettext('A plugin to provide higher resolution gallery images to hires screens.');
 $plugin_author = 'Malte Müller (acrylian)';
-$plugin_version = '1.3';
+$plugin_version = '1.3.1';
 $option_interface = 'zp_picturefill';
 zp_register_filter('theme_head', 'picturefilljs');
 
@@ -135,7 +135,7 @@ function picturefilljs() {
  *									'standard_album_thumb' for default sized album thumbs
  *									'none' for static images not part of the gallery
  */
-function getResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd = NULL, $medium_hd = NULL, $small_sd = NULL, $small_hd = NULL, $class = NULL, $id = NULL, $alt = NULL, $imagetype = 'custom_image') {
+function getResponsiveImage($standard_sd = null, $standard_hd = null, $medium_sd = null, $medium_hd = null, $small_sd = null, $small_hd = null, $class = null, $id = null, $alt = null, $imagetype = 'custom_image') {
   $imgclass = '';
   $imgid = '';
   if (!is_null($class)) {
@@ -215,7 +215,7 @@ function getResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd
  *									'standard_album_thumb' for default sized album thumbs
  *									'none' for static images not part of the gallery
  */
-function printResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_sd = NULL, $medium_hd = NULL, $small_sd = NULL, $small_hd = NULL, $class = NULL, $id = NULL, $alt = NULL, $imagetype = 'custom_image') {
+function printResponsiveImage($standard_sd = null, $standard_hd = null, $medium_sd = null, $medium_hd = null, $small_sd = null, $small_hd = null, $class = null, $id = null, $alt = null, $imagetype = 'custom_image') {
   echo getResponsiveImage($standard_sd, $standard_hd, $medium_sd, $medium_hd, $small_sd, $small_hd, $class, $id, $alt, $imagetype);
 }
 
@@ -246,7 +246,7 @@ function printResponsiveImage($standard_sd = NULL, $standard_hd = NULL, $medium_
  * @param bool $thumbStandin set to true to treat as thumbnail
  * @param bool $effects image effects (e.g. set gray to force grayscale) 
  */
-function getResponsiveCustomSizedImage($imgobj = NULL, $imgsettings, $hd = true, $maxspace = false, $thumbStandin = false, $effects = NULL) {
+function getResponsiveCustomSizedImage($imgobj = null, $imgsettings, $hd = true, $maxspace = false, $thumbStandin = false, $effects = null) {
   global $_zp_current_image;
   if (!is_object($imgobj)) {
     $imgobj = $_zp_current_image;
@@ -265,15 +265,15 @@ function getResponsiveCustomSizedImage($imgobj = NULL, $imgsettings, $hd = true,
   }
   // add NULL values for missing keys so the handling in picturefill is easier
   if (!array_key_exists('standard', $images)) {
-    $array = array('standard' => array(NULL, NULL));
+    $array = array('standard' => array(null, null));
     $images = array_merge($array, $images);
   }
   if (!array_key_exists('medium', $images)) {
-    $array = array('medium' => array(NULL, NULL));
+    $array = array('medium' => array(null, null));
     $images = array_merge($array, $images);
   }
   if (!array_key_exists('small', $images)) {
-    $array = array('small' => array(NULL, NULL));
+    $array = array('small' => array(null, null));
     $images = array_merge($array, $images);
   }
   return $images;
@@ -322,7 +322,7 @@ function getResponsiveCustomSizedImage($imgobj = NULL, $imgsettings, $hd = true,
  *												password checks and prints the lock image instead of the real thumb if needed (neither responsive nor HiDPI)
  * @return array
  */
-function printResponsiveCustomSizedImage($imgobj, $hd = true, $maxspace = false, $alt, $imgsettings, $class = NULL, $id = NULL, $thumbStandin = false, $effects = NULL,$albobj = NULL) {
+function printResponsiveCustomSizedImage($imgobj = null, $hd = true, $maxspace = false, $alt, $imgsettings, $class = null, $id = null, $thumbStandin = false, $effects = null,$albobj = null) {
 	if(is_object($albobj) && getClass($albumobj) == 'Album') {
 		$is_albumthumb = true;
 		$imagetype = 'custom_album_thumb';
@@ -353,7 +353,7 @@ function printResponsiveCustomSizedImage($imgobj, $hd = true, $maxspace = false,
   	$small_hd = $images['small']['img_hd'];
   	printResponsiveImage($standard_sd, $standard_hd, $medium_sd, $medium_hd, $small_sd, $small_hd, $class, $id, $alt,$imagetype);
 	} else {
-		echo getPasswordProtectImage(NULL);
+		echo getPasswordProtectImage(null);
 	}
 }
 
@@ -382,7 +382,7 @@ function printResponsiveCustomSizedImage($imgobj, $hd = true, $maxspace = false,
  *									'standard_album_thumb' for default sized album thumbs
  *									'none' for static images not part of the gallery
  */
-function getHDSrcsetImage($standard_sd = NULL, $standard_hd = NULL, $class, $id, $alt, $imagetype) {
+function getHDSrcsetImage($standard_sd = null, $standard_hd = null, $class, $id, $alt, $imagetype) {
 	$imgclass = '';
   $imgid = '';
   if (!is_null($class)) {
@@ -427,7 +427,7 @@ function getHDSrcsetImage($standard_sd = NULL, $standard_hd = NULL, $class, $id,
  *									'standard_album_thumb' for default sized album thumbs
  *									'none' for static images not part of the gallery
  */
-function printHDSrcsetImage($standard_sd = NULL, $standard_hd = NULL, $class, $id, $alt, $imagetype) {
+function printHDSrcsetImage($standard_sd = null, $standard_hd = null, $class, $id, $alt, $imagetype) {
 	echo getHDSrcsetImage($standard_sd, $standard_hd, $class, $id, $alt, $imagetype);
 }
 
@@ -455,9 +455,9 @@ function printHDSrcsetImage($standard_sd = NULL, $standard_hd = NULL, $class, $i
  * @param bool $effects image effects (e.g. set gray to force grayscale)
  * @return array
  */
-function printHDCustomSizedImage($imgobj, $hd = true, $size, $width = NULL, $height = NULL, $cropw = NULL, $croph = NULL, $cropx = NULL, $cropy = NULL, $thumbStandin = false, $effects = NULL) {
+function printHDCustomSizedImage($imgobj = null, $hd = true, $size, $width = null, $height = null, $cropw = null, $croph = null, $cropx = null, $cropy = null, $thumbStandin = false, $effects = null) {
 	$img = getHDCustomSizedImage($imgobj, $hd, $size, $width, $height, $cropw, $croph, $cropx, $cropy, $thumbStandin, $effects);
-  printHDSrcsetImage($img['img_sd'], $img['img_hd'] = NULL, $class, $id, $alt, 'custom_image');
+  printHDSrcsetImage($img['img_sd'], $img['img_hd'] = null, $class, $id, $alt, 'custom_image');
 }
 
 /**
@@ -484,7 +484,7 @@ function printHDCustomSizedImage($imgobj, $hd = true, $size, $width = NULL, $hei
  * @param bool $effects image effects (e.g. set gray to force grayscale)
  * @return array
  */
-function getHDCustomSizedImage($imgobj, $hd = true, $size, $width = NULL, $height = NULL, $cropw = NULL, $croph = NULL, $cropx = NULL, $cropy = NULL, $thumbStandin = false, $effects = NULL) {
+function getHDCustomSizedImage($imgobj = null, $hd = true, $size, $width = null, $height = null, $cropw = null, $croph = null, $cropx = null, $cropy = null, $thumbStandin = false, $effects = null) {
   global $_zp_current_image;
   if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
@@ -495,7 +495,7 @@ function getHDCustomSizedImage($imgobj, $hd = true, $size, $width = NULL, $heigh
               'width' => $img_sd_size[0],
               'height' => $img_sd_size[1]
   );
-  $imgs['img_hd'] = NULL;
+  $imgs['img_hd'] = null;
   $imagequality = getOption('image_quality');
   if ($hd) {
     $s2 = $size * 2;
@@ -528,7 +528,7 @@ function getHDCustomSizedImage($imgobj, $hd = true, $size, $width = NULL, $heigh
  * @param bool $thumb set to true to treat as thumbnail
  * @param bool $effects image effects (e.g. set gray to force grayscale)
  */
-function printHDCustomSizedImageMaxSpace($imgobj, $hd = true, $width, $height, $thumb = false, $effects = null) {
+function printHDCustomSizedImageMaxSpace($imgobj = null, $hd = true, $width, $height, $thumb = false, $effects = null) {
 	$img = getHDCustomSizedImageMaxSpace($imgobj, $hd, $width, $height, $thumb, $effects);
 	$imagetype = 'standard_image';
 	if($thumb) {
@@ -548,18 +548,18 @@ function printHDCustomSizedImageMaxSpace($imgobj, $hd = true, $width, $height, $
  * @param bool $thumb set to true to treat as thumbnail
  * @param bool $effects image effects (e.g. set gray to force grayscale)
  */
-function getHDCustomSizedImageMaxSpace($imgobj, $hd = true, $width, $height, $thumb = false, $effects = null) {
+function getHDCustomSizedImageMaxSpace($imgobj = null, $hd = true, $width, $height, $thumb = false, $effects = null) {
   global $_zp_current_image;
   if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
   }
   getMaxSpaceContainer($width, $height, $imgobj);
   $imgs['img_sd'] = array(
-              'url' => $imgobj->getCustomImage(NULL, $width, $height, NULL, NULL, NULL, NULL, $thumb, $effects),
+              'url' => $imgobj->getCustomImage(null, $width, $height, null, null, null, null, $thumb, $effects),
               'width' => $width,
               'height' => $height
   );
-  $imgs['img_hd'] = NULL;
+  $imgs['img_hd'] = null;
   $thumbquality = getOption('thumb_quality');
   $imagequality = getOption('image_quality');
   if ($hd) {
@@ -572,7 +572,7 @@ function getHDCustomSizedImageMaxSpace($imgobj, $hd = true, $width, $height, $th
       setOption('image_quality', getHDQuality(false), false);
     }
     $imgs['img_hd'] = array(
-                'url' => $imgobj->getCustomImage(NULL, $w2, $h2, NULL, NULL, NULL, NULL, $thumb, $effects),
+                'url' => $imgobj->getCustomImage(null, $w2, $h2, null, null, null, null, $thumb, $effects),
                 'width' => $w2,
                 'height' => $h2
     );
@@ -596,7 +596,7 @@ function getHDCustomSizedImageMaxSpace($imgobj, $hd = true, $width, $height, $th
  * @param bool $hd Set to true if the HiDPI counterpart should be generated 
  * @return array
  */
-function getHDDefaultSizedImage($imgobj, $hd = true) {
+function getHDDefaultSizedImage($imgobj = null, $hd = true) {
   global $_zp_current_image;
   if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
@@ -612,7 +612,7 @@ function getHDDefaultSizedImage($imgobj, $hd = true) {
       );
   $imagequality = getOption('image_quality');
   //hires
-  $imgs['img_hd'] = NULL;
+  $imgs['img_hd'] = null;
   if ($hd) {
     $size2 = $size * 2;
     setOption('image_quality', getHDQuality(false), false); // more compression for the hires to save file size
@@ -637,14 +637,14 @@ function getHDDefaultSizedImage($imgobj, $hd = true) {
  * @param string $class Optional style class
  * @param string $id Optional style id
  */
-function printHDDefaultSizedImage($imgobj, $hd = true, $alt = NULL, $class = NULL, $id = NULL) {
+function printHDDefaultSizedImage($imgobj = null, $hd = true, $alt = null, $class = null, $id = null) {
 	global $_zp_current_image;
   if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
   }
   $img = getHDDefaultSizedImage($imgobj, $hd);
   printHDSrcsetImage($img['img_sd'], $img['img_hd'], $class, $id, $alt, 'standard_image');
-  //printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'standard_image');
+  //printResponsiveImage($img['img_sd'], $img['img_hd'], null, null, null, null, $class, $id, $alt, 'standard_image');
 }
 
 /**
@@ -672,7 +672,7 @@ function getHDImageThumb($imgobj = null, $hd = true) {
               'height' => $img_sd_size[1]
   );
   //hires
-  $imgs['img_hd'] = NULL;
+  $imgs['img_hd'] = null;
   if ($hd) {
     setOption('thumb_crop_width', $cropw * 2, false);
     setOption('thumb_crop_height', $croph * 2, false);
@@ -702,10 +702,10 @@ function getHDImageThumb($imgobj = null, $hd = true) {
  * @param string $id optional id tag
  * @param string $imgobj Image object 
  */
-function printHDImageThumb($hd = true, $alt = NULL, $class = NULL, $id = NULL, $imgobj = null) {
+function printHDImageThumb($hd = true, $alt = null, $class = null, $id = null, $imgobj = null) {
   $img = getHDImageThumb($imgobj, $hd);
   printHDSrcsetImage($img['img_sd'], $img['img_hd'], $class, $id, $alt, 'standard_image_thumb');
-  //printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'standard_image_thumb');
+  //printResponsiveImage($img['img_sd'], $img['img_hd'], null, null, null, null, $class, $id, $alt, 'standard_image_thumb');
 }
 
 /**
@@ -719,7 +719,7 @@ function printHDImageThumb($hd = true, $alt = NULL, $class = NULL, $id = NULL, $
  * @param string $id optional id tag
  * @param string $albobj Album object optionally
  */
-function printHDAlbumThumbImage($hd = true, $alt = NULL, $class = NULL, $id = NULL, $albobj = null) {
+function printHDAlbumThumbImage($hd = true, $alt = null, $class = null, $id = null, $albobj = null) {
 	global $_zp_current_album;
 	if(is_null($albobj)) {
 		$imgobj = $_zp_current_album->getAlbumThumbImage();
@@ -738,9 +738,9 @@ function printHDAlbumThumbImage($hd = true, $alt = NULL, $class = NULL, $id = NU
   if (!getOption('use_lock_image') || $albobj->isMyItem(LIST_RIGHTS) || empty($pwd)) {
   	$img = getHDImageThumb($imgobj, $hd);
   	printHDSrcsetImage($img['img_sd'], $img['img_hd'], $class, $id, $alt, 'standard_album_thumb');
-		//printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'standard_album_thumb');
+		//printResponsiveImage($img['img_sd'], $img['img_hd'], null, null, null, null, $class, $id, $alt, 'standard_album_thumb');
 	} else {
-		echo getPasswordProtectImage(NULL);
+		echo getPasswordProtectImage(null);
 	}
 }
 
@@ -763,7 +763,7 @@ function printHDAlbumThumbImage($hd = true, $alt = NULL, $class = NULL, $id = NU
  *
  * @return string
  */
-function printHDCustomAlbumThumbImage($hd = true, $alt = NULL, $size, $width = NULL, $height = NULL, $cropw = NULL, $croph = NULL, $cropx = NULL, $cropy = null, $class = NULL, $id = NULL, $albobj = NULL) {
+function printHDCustomAlbumThumbImage($hd = true, $alt = null, $size, $width = null, $height = null, $cropw = null, $croph = null, $cropx = null, $cropy = null, $class = null, $id = null, $albobj = null) {
 	global $_zp_current_album;
 	if(is_null($albobj)) {
 		$imgobj = $_zp_current_album->getAlbumThumbImage();
@@ -782,9 +782,9 @@ function printHDCustomAlbumThumbImage($hd = true, $alt = NULL, $size, $width = N
   if (!getOption('use_lock_image') || $albobj->isMyItem(LIST_RIGHTS) || empty($pwd)) {
   	$img = getHDCustomSizedImage($imgobj, $hd, $size, $width, $height, $cropw, $croph, $cropx, $cropy, $thumbStandin, $effects);
   	printHDSrcsetImage($img['img_sd'], $img['img_hd'], $class, $id, $alt, 'custom_album_thumb');
-		//printResponsiveImage($img['img_sd'], $img['img_hd'], NULL, NULL, NULL, NULL, $class, $id, $alt, 'custom_album_thumb');
+		//printResponsiveImage($img['img_sd'], $img['img_hd'], null, null, null, null, $class, $id, $alt, 'custom_album_thumb');
 	} else {
-		echo getPasswordProtectImage(NULL);
+		echo getPasswordProtectImage(null);
 	}
 }
 
