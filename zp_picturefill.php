@@ -68,7 +68,7 @@
 $plugin_is_filter = 9 | THEME_PLUGIN;
 $plugin_description = gettext('A plugin to provide higher resolution gallery images to hires screens.');
 $plugin_author = 'Malte Müller (acrylian)';
-$plugin_version = '1.3.1';
+$plugin_version = '1.3.2';
 $option_interface = 'zp_picturefill';
 zp_register_filter('theme_head', 'picturefilljs');
 
