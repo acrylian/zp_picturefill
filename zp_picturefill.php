@@ -719,7 +719,7 @@ function printHDImageThumb($alt = null, $class = null, $id = null, $imgobj = nul
  * @param string $id optional id tag
  * @param string $albobj Album object optionally
  */
-function printHDAlbumThumbImage($hd = true, $alt = null, $class = null, $id = null, $albobj = null) {
+function printHDAlbumThumbImage($alt = null, $class = null, $id = null, $albobj = null, $hd = true) {
 	global $_zp_current_album;
 	if(is_null($albobj)) {
 		$imgobj = $_zp_current_album->getAlbumThumbImage();
@@ -763,7 +763,7 @@ function printHDAlbumThumbImage($hd = true, $alt = null, $class = null, $id = nu
  *
  * @return string
  */
-function printHDCustomAlbumThumbImage($hd = true, $alt = null, $size, $width = null, $height = null, $cropw = null, $croph = null, $cropx = null, $cropy = null, $class = null, $id = null, $albobj = null) {
+function printHDCustomAlbumThumbImage($alt = null, $size, $width = null, $height = null, $cropw = null, $croph = null, $cropx = null, $cropy = null, $class = null, $id = null, $albobj = null, $hd = true) {
 	global $_zp_current_album;
 	if(is_null($albobj)) {
 		$imgobj = $_zp_current_album->getAlbumThumbImage();
