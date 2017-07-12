@@ -637,7 +637,7 @@ function getHDDefaultSizedImage($imgobj = null, $hd = true) {
  * @param string $class Optional style class
  * @param string $id Optional style id
  */
-function printHDDefaultSizedImage($imgobj = null, $hd = true, $alt = null, $class = null, $id = null) {
+function printHDDefaultSizedImage($alt = null, $class = null, $id = null, $imgobj = null, $hd = true) {
 	global $_zp_current_image;
   if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
