@@ -702,7 +702,7 @@ function getHDImageThumb($imgobj = null, $hd = true) {
  * @param string $id optional id tag
  * @param string $imgobj Image object 
  */
-function printHDImageThumb($hd = true, $alt = null, $class = null, $id = null, $imgobj = null) {
+function printHDImageThumb($alt = null, $class = null, $id = null, $imgobj = null, $hd = true) {
   $img = getHDImageThumb($imgobj, $hd);
   printHDSrcsetImage($img['img_sd'], $img['img_hd'], $class, $id, $alt, 'standard_image_thumb');
   //printResponsiveImage($img['img_sd'], $img['img_hd'], null, null, null, null, $class, $id, $alt, 'standard_image_thumb');
