@@ -631,13 +631,13 @@ function getHDDefaultSizedImage($imgobj = null, $hd = true) {
  * Standard sized image with normal and HiDPI resolution as set on the options
  * Note: Does not work with  non image files like video or audio. Exclude them on your the theme!
  *
- * @param obj $imgobj Image object If NULL the current image is used
- * @param bool $hd Set to true if the HiDPI counterpart should be generated
  * @param string $alt Alt text
  * @param string $class Optional style class
  * @param string $id Optional style id
+ * @param obj $imgobj Image object If NULL the current image is used
+ * @param bool $hd Set to true if the HiDPI counterpart should be generated
  */
-function printHDDefaultSizedImage($imgobj = null, $hd = true, $alt = null, $class = null, $id = null) {
+function printHDDefaultSizedImage($alt = null, $class = null, $id = null, $imgobj = null, $hd = true) {
 	global $_zp_current_image;
   if (is_null($imgobj)) {
     $imgobj = $_zp_current_image;
@@ -696,13 +696,13 @@ function getHDImageThumb($imgobj = null, $hd = true) {
 /**
  * Standard thumb as set on the options
  *
- * @param bool $hd Set to true if the HiDPI counterpart should be generated
  * @param string $alt Alt text
  * @param string $class optional class tag
  * @param string $id optional id tag
  * @param string $imgobj Image object 
+ * @param bool $hd Set to true if the HiDPI counterpart should be generated
  */
-function printHDImageThumb($hd = true, $alt = null, $class = null, $id = null, $imgobj = null) {
+function printHDImageThumb($alt = null, $class = null, $id = null, $imgobj = null, $hd = true) {
   $img = getHDImageThumb($imgobj, $hd);
   printHDSrcsetImage($img['img_sd'], $img['img_hd'], $class, $id, $alt, 'standard_image_thumb');
   //printResponsiveImage($img['img_sd'], $img['img_hd'], null, null, null, null, $class, $id, $alt, 'standard_image_thumb');
@@ -713,13 +713,13 @@ function printHDImageThumb($hd = true, $alt = null, $class = null, $id = null, $
  * If the album is protected for the viewer and the lock image option is set it prints this lock image
  * plainly without any sizes or HiDPI support
  *
- * @param bool $hd Set to true if the HiDPI counterpart should be generated
  * @param string $alt Alt text
  * @param string $class optional class tag
  * @param string $id optional id tag
  * @param string $albobj Album object optionally
+ * @param bool $hd Set to true if the HiDPI counterpart should be generated
  */
-function printHDAlbumThumbImage($hd = true, $alt = null, $class = null, $id = null, $albobj = null) {
+function printHDAlbumThumbImage($alt = null, $class = null, $id = null, $albobj = null, $hd = true) {
 	global $_zp_current_album;
 	if(is_null($albobj)) {
 		$imgobj = $_zp_current_album->getAlbumThumbImage();
@@ -760,10 +760,12 @@ function printHDAlbumThumbImage($hd = true, $alt = null, $class = null, $id = nu
  * @param int $cropy crop part y axis
  * @param string $class css class
  * @param string $id css id
+ * @param string $albobj Album object optionally
+ * @param bool $hd Set to true if the HiDPI counterpart should be generated
  *
  * @return string
  */
-function printHDCustomAlbumThumbImage($hd = true, $alt = null, $size, $width = null, $height = null, $cropw = null, $croph = null, $cropx = null, $cropy = null, $class = null, $id = null, $albobj = null) {
+function printHDCustomAlbumThumbImage($alt = null, $size, $width = null, $height = null, $cropw = null, $croph = null, $cropx = null, $cropy = null, $class = null, $id = null, $albobj = null, $hd = true) {
 	global $_zp_current_album;
 	if(is_null($albobj)) {
 		$imgobj = $_zp_current_album->getAlbumThumbImage();
