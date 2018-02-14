@@ -1,7 +1,7 @@
 zp_picturefill
 ==============
 
-** NOTE: THis plugin is not actively developed because much better functionality will be implemented into the core of the next major Zenphoto release**
+**NOTE: THis plugin is not actively developed because much better functionality will be implemented into the core of the next major Zenphoto release**
 
 A [Zenphoto](http://www.zenphoto.org) plugin to responsively provide different image resolutions for different screen sizes as well as standard and HiDPI ("Retina") counter parts
  
